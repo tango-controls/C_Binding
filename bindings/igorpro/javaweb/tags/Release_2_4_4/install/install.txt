@@ -1,0 +1,22 @@
+Simply copy or create a shortcut as described:
+
+[IGOR BINDING]\iproc-files\tango_loader.ipf --goes to--> [IGOR INSTALL]\Igor Procedures
+
+[IGOR BINDING]\iproc-files\tango_monitor.ipf --goes to--> [IGOR INSTALL]\User Procedures
+[IGOR BINDING]\iproc-files\tango_panel.ipf --goes to--> [IGOR INSTALL]\User Procedures
+[IGOR BINDING]\iproc-files\tango.ipf --goes to--> IGOR INSTALL]\User Procedures
+[IGOR BINDING]\iproc-files\tango_tools.ipf --goes to--> [IGOR INSTALL]\User Procedures
+[IGOR BINDING]\iproc-files\tango_code_generator.ipf --goes to--> [IGOR INSTALL]\User Procedures
+
+[IGOR BINDING]\xop\tango_binding.xop --goes to--> [IGOR INSTALL]\Igor Extensions
+
+We now need to help Igor to locate the required TANGO libraries. The aim is to make sure that 
+Igor is running in a context in which it can access the TANGO libraries located into [IGOR BINDING]\xop.
+
+You can do that using the system PATH env. variable. You can also edit [IGOR BINDING]\install\start-igorpro.bat
+then adapt <path-to-your-tango-binding-root-directory> to the situation, finally, create a shortcut of this 
+file on your desktop:
+ 
+[IGOR BINDING]\start-igorpro.bat --goes to--> your desktop [start Igor using this script]
+
+It is HIGHLY recommended to read the introduction of the [IGOR BINDING]\tutorial\tutorial.ipf file.

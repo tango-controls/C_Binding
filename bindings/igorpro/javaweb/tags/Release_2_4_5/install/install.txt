@@ -1,0 +1,41 @@
+//=============================================================================
+// 1 - Install
+//=============================================================================
+
+No need to install the whole Tango package if you want to a pure Igor client platform.
+Simply copy the following files (or create alias) :
+[IGOR BINDING]\iproc-files\tango_loader.ipf --goes to--> [IGOR INSTALL]\Igor Procedures
+[IGOR BINDING]\iproc-files\tango_monitor.ipf --goes to--> [IGOR INSTALL]\User Procedures
+[IGOR BINDING]\iproc-files\tango_panel.ipf --goes to--> [IGOR INSTALL]\User Procedures
+[IGOR BINDING]\iproc-files\tango.ipf --goes to--> IGOR INSTALL]\User Procedures
+[IGOR BINDING]\iproc-files\tango_tools.ipf --goes to--> [IGOR INSTALL]\User Procedures
+[IGOR BINDING]\iproc-files\tango_code_generator.ipf --goes to--> [IGOR INSTALL]\User Procedures
+[IGOR BINDING]\xop\tango_binding.xop --goes to--> [IGOR INSTALL]\Igor Extensions
+
+The tango binding is now statically linked against the Tango libraries. Its means that you 
+don't need any local Tango binary distribution to run it. 
+
+//=============================================================================
+// 2 - Setting up env variable.
+//=============================================================================
+The easiest way to properly setup the required environment variables is to use 
+the provided <install/launch-igorpro.sh> shell script. However, it needs to be 
+adapted to your context.   
+
+2.1 - Tango host setup
+
+The TANGO_HOST env. variable must point to your local Tango database. Edit the
+<install/launch-igorpro.sh> script and make <TANGO_HOST> point to your Tango db (e.g.
+TANGO_HOST=192.168.0.1:10000).
+
+2.2 - Launching Igor Pro
+
+Once the <bin/launch-igorpro.sh> is properly modified, right click on the script 
+icon then select Open with…, choose the Terminal application (you might have 
+enable "all applications" in the option menu locate dat the bottom of the selection 
+dialog). Don't forget to enable the "always open with" option (checkbox).
+
+NB: Be sure to have execution permission on <install/launch-igorpro.sh>. In case you
+don't, open a terminal, cd to tango-binding /install directory, then type : 
+chmod 775 ./launch-igorpro.sh  
+

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# bugfix fontes
+#------------------------------------------------------------------------
+unset LANG
+
+#- LABVIEW ROOT DIR
+#------------------------------------------------------------------------
+LABVIEW_ROOT=/usr/Local/labview/current
+
+#- LABVIEW_LIBS: points to specific Tango & omniORB libs
+#------------------------------------------------------------------------
+LABVIEW_LIBS=$LABVIEW_ROOT/cintools:$LABVIEW_ROOT/AppLibs
+
+#- binding shared lib
+#------------------------------------------------------------------------
+BINDING_LIBS=`pwd`
+
+#- SPECIFIC_SOLEIL_LIBS: points to specific Tango & omniORB libs
+#------------------------------------------------------------------------
+SPECIFIC_SOLEIL_LIBS=/home/operateur/GrpICA/leclercq/labview/soleil-libs-gcc-3.2.3-libstdc++-5
+
+#- LD_LIBRARY_PATH: make it point to LABVIEW_LIBS & SPECIFIC_SOLEIL_LIBS
+#------------------------------------------------------------------------
+LD_LIBRARY_PATH=$LABVIEW_LIBS:$BINDING_LIBS:$SPECIFIC_SOLEIL_LIBS:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH
+
+#- start LABVIEW appplication
+#------------------------------------------------------------------------
+$LABVIEW_ROOT/labview&
+

@@ -1,0 +1,21 @@
+tango_binding.dll {
+  global:
+		open_lvb_session;
+		close_lvb_session;
+    ping;
+    state;
+    status;
+    command_inout;
+    read_attributes;
+    write_attributes;
+    subscribe_event;
+    unsubscribe_event;
+		group_create;
+		group_kill;
+		group_size;
+		group_read_attributes;
+		group_write_attributes;
+  local:
+    *;
+};
+

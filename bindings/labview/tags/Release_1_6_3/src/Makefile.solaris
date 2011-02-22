@@ -1,0 +1,169 @@
+#------------------------------------------------------------------------------
+# Makefile to generate the Tango Binding for LabVIEW - NL -SOLEIL
+#------------------------------------------------------------------------------
+PLATFORM = solaris9_CC
+
+#------------------------------------------------------------------------------
+# OMNIORB BASE DIR
+#------------------------------------------------------------------------------
+OMNIORB_BASE = /segfs/tango
+
+#------------------------------------------------------------------------------
+# TANGO BASE DIR
+#------------------------------------------------------------------------------
+TANGO_BASE = /segfs/tango
+
+#------------------------------------------------------------------------------
+# LABVIEW BASE DIR
+#------------------------------------------------------------------------------
+#LV_BASE = /sware/com/labview-82/lv82
+LV_BASE = /sware/com/labview-82-sun/lv782
+LABVIEW_VERSION = 8.2
+
+#------------------------------------------------------------------------------
+# INCLUDE DIRS
+#------------------------------------------------------------------------------
+INCLUDE_DIRS = -I. \
+               -I$(OMNIORB_BASE)/include/$(PLATFORM) \
+               -I$(TANGO_BASE)/include/$(PLATFORM) \
+               -I$(LV_BASE)/cintools
+
+#------------------------------------------------------------------------------
+# LIB DIRS
+#------------------------------------------------------------------------------
+LIB_DIRS = -L $(OMNIORB_BASE)/lib \
+           -L $(TANGO_BASE)/lib  \
+           -L $(LV_BASE)/cintools
+
+#------------------------------------------------------------------------------
+# COMPILER/LINKER OPTIONS
+#------------------------------------------------------------------------------
+# COMMON
+#------------------------------------------------------------------------------
+SO_NAME = lv_tango
+SO_EXT = so
+
+#------------------------------------------------------------------------------
+# SUN/SOLARIS/SPARC PLATFORM (*** NOT TESTED ***)
+#------------------------------------------------------------------------------
+CC = CC
+
+CFLAGS = -KPIC -mt -D_POSIX_PTHREAD_SEMANTICS -DSOLARIS -xregs=no%appl
+
+LD = $(CC)
+
+LDFLAGS = -mt -G
+
+#------------------------------------------------------------------------------
+# OBJ FILES
+#------------------------------------------------------------------------------
+OBJS_SO = DataAdapter.so.o \
+	DeviceDescriptor.so.o \
+	DeviceRepository.so.o \
+	GroupDescriptor.so.o \
+	GroupRepository.so.o \
+	Endianness.so.o \
+	ErrorStack.so.o \
+	EventManager.so.o \
+	ObjectManager.so.o \
+	TangoBinding.so.o \
+	ThreadSafeDeviceProxy.so.o
+
+#------------------------------------------------------------------------------
+# RULE: all
+#------------------------------------------------------------------------------
+all: $(SO_NAME).$(SO_EXT) install
+
+#------------------------------------------------------------------------------
+# RULE: $(SO_NAME).$(SO_EXT)
+#------------------------------------------------------------------------------
+$(SO_NAME).$(SO_EXT): $(OBJS_SO)
+	$(LD) $(LDFLAGS) -o $(SO_NAME).$(SO_EXT) $(OBJS_SO) $(LIB_DIRS) \
+        -llv -lomniORB4 -lomniDynamic4 -lCOS4 -lomnithread -ltango -llog4tango
+
+#------------------------------------------------------------------------------
+# RULE: DataAdapter.so.o
+#------------------------------------------------------------------------------
+DataAdapter.so.o: DataAdapter.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) DataAdapter.cpp -c -o DataAdapter.so.o
+
+#------------------------------------------------------------------------------
+# RULE: DeviceDescriptor.so.o
+#------------------------------------------------------------------------------
+DeviceDescriptor.so.o: DeviceDescriptor.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) DeviceDescriptor.cpp -c -o DeviceDescriptor.so.o
+
+#------------------------------------------------------------------------------
+# RULE: DeviceRepository.so.o
+#------------------------------------------------------------------------------
+DeviceRepository.so.o: DeviceRepository.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) DeviceRepository.cpp -c -o DeviceRepository.so.o
+
+#------------------------------------------------------------------------------
+# RULE: GroupDescriptor.so.o
+#------------------------------------------------------------------------------
+GroupDescriptor.so.o: GroupDescriptor.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) GroupDescriptor.cpp -c -o GroupDescriptor.so.o
+
+#------------------------------------------------------------------------------
+# RULE: GroupRepository.so.o
+#------------------------------------------------------------------------------
+GroupRepository.so.o: GroupRepository.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) GroupRepository.cpp -c -o GroupRepository.so.o
+
+#------------------------------------------------------------------------------
+# RULE: MexUtils.so.o
+#------------------------------------------------------------------------------
+Endianness.so.o: Endianness.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) Endianness.cpp -c -o Endianness.so.o
+
+#------------------------------------------------------------------------------
+# RULE: ErrorStack.so.o
+#------------------------------------------------------------------------------
+ErrorStack.so.o: ErrorStack.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) ErrorStack.cpp -c -o ErrorStack.so.o
+
+#------------------------------------------------------------------------------
+# RULE: EventManager.so.o
+#------------------------------------------------------------------------------
+EventManager.so.o: EventManager.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) EventManager.cpp -c -o EventManager.so.o
+
+#------------------------------------------------------------------------------
+# RULE: ObjectManager.so.o
+#------------------------------------------------------------------------------
+ObjectManager.so.o: ObjectManager.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) ObjectManager.cpp -c -o ObjectManager.so.o
+
+#------------------------------------------------------------------------------
+# RULE: TangoBinding.so.o
+#------------------------------------------------------------------------------
+TangoBinding.so.o: TangoBinding.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) TangoBinding.cpp -c -o TangoBinding.so.o
+
+#------------------------------------------------------------------------------
+# RULE: ThreadSafeDeviceProxy.so.o
+#------------------------------------------------------------------------------
+ThreadSafeDeviceProxy.so.o: ThreadSafeDeviceProxy.cpp
+	$(CC) $(CFLAGS) $(INCLUDE_DIRS) ThreadSafeDeviceProxy.cpp -c -o ThreadSafeDeviceProxy.so.o
+
+#------------------------------------------------------------------------------
+# RULE: clean
+#------------------------------------------------------------------------------
+clean:
+	rm -f *.so.o $(SO_NAME).$(SO_EXT)
+	
+#------------------------------------------------------------------------------
+# RULE: install
+#------------------------------------------------------------------------------
+install:
+	cp -f ./$(SO_NAME).$(SO_EXT) ../tango/$(SO_NAME).$(LABVIEW_VERSION).$(SO_EXT)
+	rm -f ./$(SO_NAME).$(SO_EXT)
+
+
+
+
+
+
+
+

@@ -1,0 +1,21 @@
+tango_binding.dll 
+{
+global:
+  ping;
+  state;
+  status;
+  command_inout;
+  read_attributes;
+  write_attributes;
+  subscribe_event;
+  unsubscribe_event;
+  group_create;
+  group_kill;
+  group_size;
+  group_read_attributes;
+  group_write_attributes;
+  extract_archived_data;
+  set_timeout;
+local:
+  *;
+};
