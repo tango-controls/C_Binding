@@ -12,14 +12,15 @@ static const char *RcsId = "$Id$\n$Name$";
  * $Author$
  *
  * $Log$
- * Revision 1.3  2007/12/20 07:57:03  jensmeyer
- * Corrected file headers
+ * Revision 1.3  2007/12/03 14:46:51  meyer
+ * Added timeout and data source functions.
  *
- * Revision 1.2  2007/12/12 14:20:50  jensmeyer
- * Added doxygen documentation headers and commented code
+ * Revision 1.2  2007/12/03 07:25:31  meyer
+ * Function cores prepared
  *
- * Revision 1.1.1.1  2007/12/05 15:05:04  jensmeyer
- * Tango C language binding
+ * Revision 1.1  2007/11/29 14:01:22  meyer
+ * Initial revision
+ *
  *
  ******************************************************************************/ 
 
@@ -31,6 +32,11 @@ void translate_exception (Tango::DevFailed& tango_exception, ErrorStack *error);
 /********************************/
 /* External interface functions */
 /********************************/
+
+/**@name Command related functions
+ * Functions to execute commands on Tango devices
+ */
+
 
 /* Create the device proxy */
 
@@ -153,103 +159,7 @@ bool tango_get_source (void *proxy, DevSource *source, ErrorStack *error)
 }
 
 
-bool tango_lock (void *proxy, ErrorStack *error)
-{
-	Tango::DeviceProxy *dev;
-	
-	try
-		{
-		dev = (Tango::DeviceProxy *) proxy;
-		dev->lock();
-		}
-		
-	catch (Tango::DevFailed &tango_exception)
-		{
-		translate_exception (tango_exception, error);
-		return false;
-		}
-		
-	return true;
-}
 
-bool tango_unlock (void *proxy, ErrorStack *error)
-{
-	Tango::DeviceProxy *dev;
-	
-	try
-		{
-		dev = (Tango::DeviceProxy *) proxy;
-		dev->unlock();
-		}
-		
-	catch (Tango::DevFailed &tango_exception)
-		{
-		translate_exception (tango_exception, error);
-		return false;
-		}
-		
-	return true;
-}
-
-bool tango_is_locked (void *proxy, bool *is_locked, ErrorStack *error)
-{
-	Tango::DeviceProxy *dev;
-	
-	try
-		{
-		dev = (Tango::DeviceProxy *) proxy;
-		*is_locked = dev->is_locked();
-		}
-		
-	catch (Tango::DevFailed &tango_exception)
-		{
-		translate_exception (tango_exception, error);
-		return false;
-		}
-		
-	return true;
-}
-
-bool tango_is_locked_by_me (void *proxy, bool *is_locked_by_me, ErrorStack *error)
-{
-	Tango::DeviceProxy *dev;
-	
-	try
-		{
-		dev = (Tango::DeviceProxy *) proxy;
-		*is_locked_by_me = dev->is_locked_by_me();
-		}
-		
-	catch (Tango::DevFailed &tango_exception)
-		{
-		translate_exception (tango_exception, error);
-		return false;
-		}
-		
-	return true;
-}
-
-bool tango_locking_status (void *proxy, char **locking_status, ErrorStack *error)
-{
-	Tango::DeviceProxy *dev;
-	
-	try
-		{
-		dev = (Tango::DeviceProxy *) proxy;
-		string st = dev->locking_status();
-		
-		*locking_status = (char *) calloc((st.size() + 1), sizeof(char));
-		sprintf (*locking_status, "%s", st.c_str());
-		}
-		
-	catch (Tango::DevFailed &tango_exception)
-		{
-		translate_exception (tango_exception, error);
-		return false;
-		}
-		
-	return true;
-}
 
 
 void tango_free_ErrorStack (ErrorStack *error)

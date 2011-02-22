@@ -12,23 +12,15 @@ static const char *RcsId = "$Id$\n$Name$";
  * $Author$
  *
  * $Log$
- * Revision 1.6  2008/03/28 13:34:24  jensmeyer
- * Corrected memory leaks in attribute and command reading.
+ * Revision 1.3  2007/12/03 14:28:30  meyer
+ * Added command and attribute query functions.
  *
- * Revision 1.5  2007/12/20 07:57:02  jensmeyer
- * Corrected file headers
+ * Revision 1.2  2007/12/03 07:24:30  meyer
+ * Data types implemented.
  *
- * Revision 1.4  2007/12/18 17:26:20  jensmeyer
- * Added new file for database access and corrected bugs
+ * Revision 1.1  2007/11/29 14:01:22  meyer
+ * Initial revision
  *
- * Revision 1.3  2007/12/12 14:20:50  jensmeyer
- * Added doxygen documentation headers and commented code
- *
- * Revision 1.2  2007/12/07 16:05:15  jensmeyer
- * Some name changes to be comaptible with Taco
- *
- * Revision 1.1.1.1  2007/12/05 15:05:04  jensmeyer
- * Tango C language binding
  *
  ******************************************************************************/ 
 
@@ -45,6 +37,23 @@ static void convert_attr_query (Tango::AttributeInfo& tango_attr_info, Attribute
 /* External interface functions */
 /********************************/
 
+/**@name Attribute related functions
+ * Functions to read and write data from and to Tango attributes
+ */
+ 
+/*@{*/
+/**
+ * Read a list of attributes from a Tango device
+ *
+ * @param proxy Pointer to the device proxy to access the device
+ * @param attr_names The list of attributes to be read
+ * @param argout A sequence of AttributeData structures with the results of the
+ * reading results
+ * @param error A pointer to an error stack which will be initialised in case of
+ * an execution error
+ *
+ * @return A boolean set to false when an error occured during execution
+ */
 bool tango_read_attributes (void *proxy, VarStringArray *attr_names, AttributeDataList *argout, ErrorStack *error)
 {
 	vector<Tango::DeviceAttribute> *devattr_list;
@@ -291,21 +300,9 @@ void tango_free_AttributeData (AttributeData *attribute_data)
 				}
 				
 			free (attribute_data->attr_data.string_arr.sequence);
-			attribute_data->attr_data.string_arr.sequence = NULL;
-			attribute_data->attr_data.string_arr.length = 0;
+			attribute_data->attr_data.state_arr.sequence = NULL;
+			attribute_data->attr_data.state_arr.length = 0;
 			break;											
-		
-		case DEV_ENCODED:
-			for (int i=0; i<attribute_data->attr_data.encoded_arr.length; i++ )
-				{
-				free (attribute_data->attr_data.encoded_arr.sequence[i].encoded_format);
-				free (attribute_data->attr_data.encoded_arr.sequence[i].encoded_data);
-				}
-				
-			free (attribute_data->attr_data.encoded_arr.sequence);
-			attribute_data->attr_data.encoded_arr.sequence = NULL;
-			attribute_data->attr_data.encoded_arr.length = 0;
-			break;
 		}		
 }
 
@@ -502,8 +499,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.bool_arr.sequence,
 				      bool_seq->get_buffer(), 
 						(sizeof(bool) * nb_data) );			  
-			
-			delete bool_seq;
 			break;
 			}
 
@@ -521,8 +516,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.char_arr.sequence,
 				      char_seq->get_buffer(), 
 						(sizeof(unsigned char) * nb_data) );			  
-			
-			delete char_seq;
 			break;
 			}
 
@@ -540,8 +533,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.short_arr.sequence,
 				      short_seq->get_buffer(), 
 						(sizeof(short) * nb_data) );			  
-			
-			delete short_seq;
 			break;
 			}
 			
@@ -559,8 +550,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.ushort_arr.sequence,
 				      ushort_seq->get_buffer(), 
 						(sizeof(unsigned short) * nb_data) );			  
-			
-			delete ushort_seq;
 			break;
 			}			
 			
@@ -578,8 +567,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.long_arr.sequence,
 				      long_seq->get_buffer(), 
 						(sizeof(int) * nb_data) );			  
-			
-			delete long_seq;
 			break;
 			}	
 			
@@ -597,8 +584,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.ulong_arr.sequence,
 				      ulong_seq->get_buffer(), 
 						(sizeof(unsigned int) * nb_data) );			  
-			
-			delete ulong_seq;
 			break;
 			}				
 	
@@ -616,8 +601,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.long64_arr.sequence,
 				      long64_seq->get_buffer(), 
 						(sizeof(Tango::DevLong64) * nb_data) );									  
-			
-			delete long64_seq;
 			break;
 			}	
 			
@@ -635,8 +618,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.ulong64_arr.sequence,
 				      ulong64_seq->get_buffer(), 
 						(sizeof(Tango::DevULong64) * nb_data) );
-			
-			delete ulong64_seq;
 			break;
 			}		
 									
@@ -654,8 +635,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.float_arr.sequence,
 				      float_seq->get_buffer(), 
 						(sizeof(float) * nb_data) );			  
-			
-			delete float_seq;
 			break;
 			} 
 
@@ -673,8 +652,6 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			memcpy ( argout->attr_data.double_arr.sequence,
 				      double_seq->get_buffer(), 
 						(sizeof(double) * nb_data) );			  
-			
-			delete double_seq;
 			break;
 			} 
 			
@@ -724,59 +701,16 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			nb_data = state_vect.size();
 
 			/* allocate sequence */
-			argout->attr_data.state_arr.sequence = new TangoDevState[nb_data];
+			argout->attr_data.state_arr.sequence = new DevState[nb_data];
 			argout->attr_data.state_arr.length   = nb_data;
 
 			/* copy data */
 			for (int i=0 ; i<nb_data ; i++)
 				{
-				argout->attr_data.state_arr.sequence[i] = (TangoDevState) state_vect[i];
+				argout->attr_data.state_arr.sequence[i] = (DevState) state_vect[i];
 				}					  
 			break;
-			}
-			
-			
-		case DEV_ENCODED:
-			{
-			/* vector<Tango::DevEncoded>	encoded_vect; */
-			Tango::DevVarEncodedArray *encoded_vect;
-			int nb_data;
-
-		  
-			devattr >> encoded_vect;
-			/* nb_data =  encoded_vect.size(); */
-			nb_data =  encoded_vect->length();
-
-			/* allocate sequence */
-			argout->attr_data.encoded_arr.sequence = (TangoDevEncoded *) calloc(nb_data, sizeof(TangoDevEncoded *));;
-			argout->attr_data.encoded_arr.length   = nb_data;
-
-			/* allocate the encoded structues and copy data */
-			for (int i=0 ; i<nb_data ; i++)
-				{
-				string format ((*encoded_vect)[i].encoded_format);
-				argout->attr_data.encoded_arr.sequence[i].encoded_format = new char[format.size() + 1];
-				sprintf (argout->attr_data.encoded_arr.sequence[i].encoded_format, "%s", format.c_str());
-				
-				/* get the pointer to the buffer and take over the memory */
-				/* setting the parameter to true, does not free the memory when freeing the CORBA sequence */
-				
-				argout->attr_data.encoded_arr.sequence[i].encoded_length = 
-						(*encoded_vect)[i].encoded_data.length();
-				argout->attr_data.encoded_arr.sequence[i].encoded_data   =
-						(unsigned char *)(*encoded_vect)[i].encoded_data.get_buffer(true);
-								
-				}				  
-			break;
-			} 			
-				
-		
-		default:
-				Tango::Except::throw_exception 
-						((const char *)"Data type error",
-	                (const char *)"The requested data type is not implemented for attribute reading!",
-	                (const char *)"c_tango_attribute.c::convert_attribute_reading()");
-				break;		
+			}				
 		}
 
 	/* get quality factor */
@@ -972,25 +906,7 @@ void convert_attribute_writing (AttributeData *argin, Tango::DeviceAttribute& de
 				/* Inert into the DeviceAtrribute object */
 				devattr.insert (state_arr, argin->dim_x, argin->dim_y);
 				break;
-				}
-				
-			case DEV_ENCODED:
-				{
-				/* today encoded type is only avalable as SCALAR data type */
-				
-				/* Insert into the DeviceAtrribute object */
-				devattr.insert (argin->attr_data.encoded_arr.sequence[0].encoded_format, 
-				                argin->attr_data.encoded_arr.sequence[0].encoded_data,
-								argin->attr_data.encoded_arr.sequence[0].encoded_length);				
-				break;
-				}
-				
-			default:
-				Tango::Except::throw_exception 
-					((const char *)"Data type error",
-	                (const char *)"The requested data type is not implemented for attribute writing!",
-	                (const char *)"c_tango_attribute.c::convert_attribute_writing()");
-				break;									
+				}					
 			}		
 		
 		/* set attribute name */

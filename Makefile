@@ -29,7 +29,7 @@ AR_SL = $(CC) -fPIC -shared -ldl
 VERS_OPT = -Wl,-soname,
 SL_EXT = so
 #
-DOC_CONFIG = doxygen/Doxyfile
+DOC_CONFIG = ../doxygen/Doxyfile
 GEN_DOC = $(DOXYGEN) $(DOC_CONFIG)
 endif
 
@@ -40,10 +40,10 @@ OBJS_DIR = 		objs/$(BIN_DIR)
 OBJS_DIR_SL = 	objs_sl/$(BIN_DIR)
 
 
-INCLUDE_DIRS = 	-I$(CLIENT_SRC) \
-				-I$(TANGO_BASE)/include \
-				-I$(OMNI_BASE)/include \
-	       		-I$(LOG4TANGO_BASE)/include
+INCLUDE_DIRS = -I$(TANGO_BASE)/include \
+					-I$(OMNI_BASE)/include \
+	       		-I$(LOG4TANGO_BASE)/include \
+	       		-I$(CLIENT_SRC) 
 
 LIB_DIRS     = -L $(TANGO_HOME)/lib \
 					-L$(OMNI_BASE)/lib \
@@ -100,15 +100,11 @@ AR_EXT = a
 		
 CLIENT_OBJS = 	$(OBJS_DIR)/c_tango_proxy.o \
 		$(OBJS_DIR)/c_tango_command.o \
-		$(OBJS_DIR)/c_tango_attribute.o \
-		$(OBJS_DIR)/c_tango_const.o \
-		$(OBJS_DIR)/c_tango_dbase.o
+		$(OBJS_DIR)/c_tango_attribute.o 
 	  
 CLIENT_OBJS_SL = $(OBJS_DIR_SL)/c_tango_proxy.so.o \
 		$(OBJS_DIR_SL)/c_tango_command.so.o \
-		$(OBJS_DIR_SL)/c_tango_attribute.so.o \
-		$(OBJS_DIR_SL)/c_tango_const.so.o \
-		$(OBJS_DIR_SL)/c_tango_dbase.so.o
+		$(OBJS_DIR_SL)/c_tango_attribute.so.o
 
 CLIENT_INCLUDE =	c_tango.h
 

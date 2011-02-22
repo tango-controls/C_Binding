@@ -14,15 +14,6 @@ static const char *RcsId = "$Id$\n$Name$";
  * $Author$
  *
  * $Log$
- * Revision 1.3  2007/12/18 17:33:11  jensmeyer
- * Added database access for properties and query requests.
- *
- * Revision 1.2  2007/12/07 16:06:43  jensmeyer
- * Some name changes to be comaptible with Taco
- *
- * Revision 1.1.1.1  2007/12/05 15:05:05  jensmeyer
- * Tango C language binding
- *
  *
  ******************************************************************************/ 
 
@@ -32,14 +23,12 @@ static const char *RcsId = "$Id$\n$Name$";
 
 #include <c_tango.h>
 
-
 main (unsigned int argc, char **argv)
 {
 	void 			*proxy;
-	void 			*db_proxy;
 	ErrorStack error;
 
-	char			cmd_string [256];
+	char			cmd_string [80];
 	long 			cmd;
 
 
@@ -49,17 +38,6 @@ main (unsigned int argc, char **argv)
 	   exit(1);
 		}
 
-	/* open the database connection */
-	if ( !tango_create_database_proxy (&db_proxy, &error) )
-		{
-		tango_print_ErrorStack (&error);
-		tango_free_ErrorStack (&error);
-
-		exit(1);
-		}
-
-	printf("create proxy\n");
-	/* open the device connection */
 	if ( !tango_create_device_proxy (argv[1], &proxy, &error) )
 		{
 		tango_print_ErrorStack (&error);
@@ -67,13 +45,12 @@ main (unsigned int argc, char **argv)
 
 		exit(1);
 		}
-	printf("create proxy done\n");
 	
 	while (1)
 		{
-	    printf("\n\nSelect one of the following commands : \n\n");
-	    printf("           1. Command list query\n");
-	    printf("           2. Command info\n");
+	   printf("\n\nSelect one of the following commands : \n\n");
+	   printf("           1. Command list query\n");
+	   printf("           2. Command info\n");
 		printf("           3. Attribute list\n");
 		printf("           4. Attribute list query\n");
 		printf("           5. Attribute info\n\n");
@@ -83,25 +60,8 @@ main (unsigned int argc, char **argv)
 		printf("           8. Get data source\n");		
 		printf("           9. Set data source\n\n");
 		
-		printf("          10. Lock device\n");
-		printf("          11. Unlock device\n");
-		printf("          12. Is the device locked?\n");
-		printf("          13. Is the device locked by me?\n");		
-		printf("          14. Locking status\n\n");
-		
-		printf("          15. Execute command without argin\n");
-		printf("          16. Read attribute\n");
-		printf("          17. Read device property\n");
-		printf("          18. Put device property\n");		
-		printf("          19. Delete device property\n\n");		
-		
-		printf("          20. Read exported devices\n");
-		printf("          21. Read all exported devices for a class\n");
-		printf("          22. Read the list of free property objects\n");
-		printf("          23. Read the list of free properties for an object\n");
-		printf("          24. Read a free property of an object\n");
-		printf("          25. Put a scalar free property of an object\n");		
-		printf("          26. Delete a free property of an object\n");
+		printf("          10. Execute command without argin\n");
+		printf("          11. Read attribute\n");
 		
 	   printf("\n           0. Quit \n\n");
 	   printf("Execute command number ? ");
@@ -351,91 +311,6 @@ main (unsigned int argc, char **argv)
 
 	   	case (10) :
 				{
-				if ( !tango_lock (proxy, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					printf ("Device is locked!\n");
-					}
-				}
-				break;
-				
-		case (11) :
-				{
-				if ( !tango_unlock (proxy, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					printf ("Device is unlocked!\n");
-					}
-				}
-				break;
-
-		case (12) :
-				{
-				bool is_locked;
-				
-				if ( !tango_is_locked (proxy, &is_locked, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					if ( is_locked )
-						printf ("The device is locked\n");
-					else
-						printf ("The device is not locked\n");
-					}
-				}
-				break;
-				
-		case (13) :
-				{
-				bool is_locked_by_me;
-				
-				if ( !tango_is_locked_by_me (proxy, &is_locked_by_me, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					if ( is_locked_by_me )
-						printf ("The device is locked by me\n");
-					else
-						printf ("The device is not locked by me\n");
-					}
-
-				}
-				break;
-				
-		case (14) :
-				{
-				char *status;
-				
-				if ( !tango_locking_status (proxy, &status, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					printf ("Locking status : %s\n", status);
-					free (status);
-					}
-
-				}
-				break;
-
-	   	case (15) :
-				{
 				CommandData cmd_in, cmd_out;
 				
 				printf("\nEnter a command name : ");
@@ -474,7 +349,7 @@ main (unsigned int argc, char **argv)
 							break;
 						
 						case DEV_STATE:
-							printf ("cmd result = %s\n", TangoDevStateName[cmd_out.cmd_data.state_val]);
+							printf ("cmd result = %s\n", DevStateName[cmd_out.cmd_data.state_val]);
 							break;
 							
 						case DEV_STRING:
@@ -529,7 +404,7 @@ main (unsigned int argc, char **argv)
 				break;
 
 
-	   	case (16) :
+	   	case (11) :
 				{
 				AttributeData attr_out;
 				
@@ -623,11 +498,11 @@ main (unsigned int argc, char **argv)
 							case DEV_STATE:
 								for (i=0; i<attr_out.dim_x; i++)
 									{
-									printf ("attr read value = %s\n", TangoDevStateName[attr_out.attr_data.state_arr.sequence[i]]);
+									printf ("attr read value = %s\n", DevStateName[attr_out.attr_data.state_arr.sequence[i]]);
 									}
 								for (i=attr_out.dim_x; i<attr_out.attr_data.state_arr.length; i++)
 									{
-									printf ("attr set value  = %s\n", TangoDevStateName[attr_out.attr_data.state_arr.sequence[i]]);
+									printf ("attr set value  = %s\n", DevStateName[attr_out.attr_data.state_arr.sequence[i]]);
 									}
 								break;
 								
@@ -654,399 +529,7 @@ main (unsigned int argc, char **argv)
 				break;
 
 
-	   	case (17) :
-				{
-				DbData prop_list;
-				DbDatum props[1];
-				
-				prop_list.length   = 1;
-				prop_list.sequence = &(props[0]);
-				
-				printf("\nEnter the property name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-
-				props[0].property_name = cmd_string;
-				props[0].data_type     = DEVVAR_STRINGARRAY;
 							
-				if ( !tango_get_device_property (proxy, &prop_list, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					if ( prop_list.sequence[0].is_empty )
-						{
-						printf ("\nNo property value found for %s\n", 
-								prop_list.sequence[0].property_name);
-						
-						}
-					else
-						{
-						if ( prop_list.sequence[0].wrong_data_type )
-							{
-							printf ("\nCannot convert property value to the requested data type for %s\n", 
-									prop_list.sequence[0].property_name);
-							}
-						else
-							{
-							int i;
-							printf ("Property  = %s\n", prop_list.sequence[0].property_name);
-							for (i=0; i< prop_list.sequence[0].prop_data.string_arr.length; i++)
-								{
-								printf ("Value [%d] = %s\n", i,
-											prop_list.sequence[0].prop_data.string_arr.sequence[i]);
-								}
-							}
-											
-						tango_free_DbData (&prop_list); 
-						}
-					}				
-				}
-				break;
-				
-	   	case (18) :
-				{
-				DbData prop_list;
-				DbDatum props[1];
-				char prop_name[256];
-				
-				prop_list.length   = 1;
-				prop_list.sequence = &(props[0]);
-					
-				printf("\nEnter the property name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-				sprintf (prop_name, "%s", cmd_string);
-				
-				printf("\nEnter the property value : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-	
-	
-				props[0].property_name = prop_name;
-				props[0].data_type     = DEV_STRING;
-				props[0].prop_data.string_val = cmd_string;	
-							
-				if ( !tango_put_device_property (proxy, &prop_list, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					printf ("Written property = %s with value = %s\n", 
-					         prop_list.sequence[0].property_name,
-								prop_list.sequence[0].prop_data.string_val);			
-					}				
-				}
-				break;
-								
-	   	case (19) :
-				{
-				DbData prop_list;
-				DbDatum props[1];
-				
-				prop_list.length   = 1;
-				prop_list.sequence = &(props[0]);
-		
-				printf("\nEnter the property name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-
-				props[0].property_name = cmd_string;
-							
-				if ( !tango_delete_device_property (proxy, &prop_list, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}
-				else
-					{
-					printf ("Deleted property  = %s\n", prop_list.sequence[0].property_name);
-					}						
-				}
-				break;				
-				
-				
-	   	case (20) :
-				{
-				DbDatum props;
-								
-				printf("\nEnter a device name (* as wildcard) : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-							
-				if ( !tango_get_device_exported (db_proxy, cmd_string, &props, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					if ( props.is_empty )
-						{
-						printf ("\nNo property value found for %s\n", 
-								props.property_name);
-						
-						}
-					else
-						{
-						int i;
-						printf ("Device filter = %s\n", props.property_name );
-						for (i=0; i< props.prop_data.string_arr.length; i++)
-							{
-							printf ("Value [%d] = %s\n", i,
-											props.prop_data.string_arr.sequence[i]);
-							}
-						}
-					
-					tango_free_DbDatum (&props); 
-					}				
-				}
-				break;
-								
-	   	case (21) :
-				{
-				DbDatum props;
-								
-				printf("\nEnter a class name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-							
-				if ( !tango_get_device_exported_for_class 
-				              (db_proxy, cmd_string, &props, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					if ( props.is_empty )
-						{
-						printf ("\nNo property value found for %s\n", 
-								props.property_name);
-						
-						}
-					else
-						{
-						int i;
-						printf ("Class name = %s\n", props.property_name);
-						for (i=0; i< props.prop_data.string_arr.length; i++)
-							{
-							printf ("Value [%d] = %s\n", i,
-											props.prop_data.string_arr.sequence[i]);
-							}
-						}
-					
-					tango_free_DbDatum (&props); 
-					}				
-				}
-				break;
-				
-				
-	   	case (22) :
-				{
-				DbDatum props;
-								
-				printf("\nEnter an object name (* as wildcard) : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-							
-				if ( !tango_get_object_list (db_proxy, cmd_string, &props, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					if ( props.is_empty )
-						{
-						printf ("\nNo objects found for %s\n", 
-								props.property_name);
-						
-						}
-					else
-						{
-						int i;
-						printf ("Object filter = %s\n", props.property_name );
-						for (i=0; i< props.prop_data.string_arr.length; i++)
-							{
-							printf ("Value [%d] = %s\n", i,
-											props.prop_data.string_arr.sequence[i]);
-							}
-											
-						tango_free_DbDatum (&props); 
-						}
-					}				
-				}
-				break;
-				
-				
-	   	case (23) :
-				{
-				DbDatum props;
-				char obj_name[256];
-				
-				printf("\nEnter an object name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-				sprintf (obj_name, "%s", cmd_string);								
-				
-				printf("\nEnter a property name (* as wildcard) : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-							
-				if ( !tango_get_object_property_list (db_proxy, obj_name, 
-				                            cmd_string, &props, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					if ( props.is_empty )
-						{
-						printf ("\nNo objects found for %s\n", 
-								props.property_name);
-						
-						}
-					else
-						{
-						int i;
-						printf ("Object filter = %s\n", props.property_name );
-						for (i=0; i< props.prop_data.string_arr.length; i++)
-							{
-							printf ("Value [%d] = %s\n", i,
-											props.prop_data.string_arr.sequence[i]);
-							}
-					
-						tango_free_DbDatum (&props); 						
-						}
-					}				
-				}
-				break;
-				
-	   	case (24) :
-				{
-				DbData prop_list;
-				DbDatum props[1];
-				char obj_name[256];
-				
-				prop_list.length   = 1;
-				prop_list.sequence = &(props[0]);
-	
-				printf("\nEnter an object name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-				sprintf (obj_name, "%s", cmd_string);
-				
-				printf("\nEnter the property name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-
-				props[0].property_name = cmd_string;
-				props[0].data_type     = DEVVAR_STRINGARRAY;
-							
-				if ( !tango_get_property (db_proxy, obj_name, &prop_list, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					if ( prop_list.sequence[0].is_empty )
-						{
-						printf ("\nNo property value found for %s\n", 
-								prop_list.sequence[0].property_name);
-						
-						}
-					else
-						{
-						if ( prop_list.sequence[0].wrong_data_type )
-							{
-							printf ("\nCannot convert property value to the requested data type for %s\n", 
-									prop_list.sequence[0].property_name);
-							}
-						else
-							{
-							int i;
-							printf ("Property  = %s\n", prop_list.sequence[0].property_name);
-							for (i=0; i< prop_list.sequence[0].prop_data.string_arr.length; i++)
-								{
-								printf ("Value [%d] = %s\n", i,
-											prop_list.sequence[0].prop_data.string_arr.sequence[i]);
-								}
-							
-												
-							tango_free_DbData (&prop_list); 
-							}
-						}
-					}				
-				}
-				break;
-				
-	   	case (25) :
-				{
-				DbData prop_list;
-				DbDatum props[1];
-				char obj_name[256];
-				char prop_name[256];
-				
-				prop_list.length   = 1;
-				prop_list.sequence = &(props[0]);
-	
-				printf("\nEnter an object name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-				sprintf (obj_name, "%s", cmd_string);
-				
-				printf("\nEnter the property name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-				sprintf (prop_name, "%s", cmd_string);
-				
-				printf("\nEnter the property value : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-	
-	
-				props[0].property_name = prop_name;
-				props[0].data_type     = DEV_STRING;
-				props[0].prop_data.string_val = cmd_string;	
-							
-				if ( !tango_put_property (db_proxy, obj_name, &prop_list, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}		
-				else
-					{
-					printf ("Written property = %s with value = %s\n", 
-					         prop_list.sequence[0].property_name,
-								prop_list.sequence[0].prop_data.string_val);			
-					}				
-				}
-				break;				
-
-	   	case (26) :
-				{
-				DbData prop_list;
-				DbDatum props[1];
-				char obj_name[256];
-				
-				prop_list.length   = 1;
-				prop_list.sequence = &(props[0]);
-	
-				printf("\nEnter an object name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-				sprintf (obj_name, "%s", cmd_string);
-				
-				printf("\nEnter the property name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
-
-				props[0].property_name = cmd_string;
-							
-				if ( !tango_delete_property (db_proxy, obj_name, &prop_list, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					}						
-				else
-					{
-					printf ("Deleted property  = %s\n", prop_list.sequence[0].property_name);
-					}				
-				}
-				break;
-				
-																											
 	   	case (0) : 
 				/*
 		 			   *  free the connection to the device
@@ -1057,16 +540,6 @@ main (unsigned int argc, char **argv)
 					tango_free_ErrorStack (&error);
 					exit (1);
 					}
-					
-				/*
-		 			   *  free the connection to the database
-		 				*/
-				if ( !tango_delete_database_proxy (&db_proxy, &error) )
-					{
-					tango_print_ErrorStack (&error);
-					tango_free_ErrorStack (&error);
-					exit (1);
-					}					
 					
 	        	exit(0);
 				break;

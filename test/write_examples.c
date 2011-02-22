@@ -15,12 +15,6 @@ static const char *RcsId = "$Id$\n$Name$";
  * $Author$
  *
  * $Log$
- * Revision 1.2  2007/12/07 16:06:43  jensmeyer
- * Some name changes to be comaptible with Taco
- *
- * Revision 1.1.1.1  2007/12/05 15:05:05  jensmeyer
- * Tango C language binding
- *
  *
  ******************************************************************************/ 
 
@@ -39,8 +33,8 @@ main (unsigned int argc, char **argv)
 	char			cmd_string [80];
 	long 			cmd;
 	
-	double 				d_val = 11.22;
-	TangoDevLong	 l_val = 1234;
+	double 		d_val = 11.22;
+	DevLong	 l_val = 1234;
 
 
 	if (argc < 2)
@@ -236,81 +230,5 @@ main (unsigned int argc, char **argv)
 			tango_free_AttributeDataList (&out_list);
 			}
 		}
-		
-		/* write and read a list of device properties */
-		
-		{
-		DbData prop_list;
-		DbDatum props[2];
-				
-		prop_list.length   = 2;
-		prop_list.sequence = &(props[0]);
-					
-		props[0].property_name = "double_property";
-		props[0].data_type     = DEV_DOUBLE;
-		props[0].prop_data.double_val = 123.45;
-		
-		props[1].property_name = "bool_property";
-		props[1].data_type     = DEV_BOOLEAN;
-		props[1].prop_data.bool_val = false;	
-			
-		/* write the properties */					
-		if ( !tango_put_device_property (proxy, &prop_list, &error) )
-			{
-			tango_print_ErrorStack (&error);
-			tango_free_ErrorStack (&error);
-			}		
-		else
-			{
-			/* read the properties */
-			
-			props[0].prop_data.double_val = 0;
-			props[1].prop_data.bool_val   = true;				
-				
-			if ( !tango_get_device_property (proxy, &prop_list, &error) )
-				{
-				tango_print_ErrorStack (&error);
-				tango_free_ErrorStack (&error);
-				}		
-			else
-				{
-				int i;
-				for (i=0; i< prop_list.length; i++)
-					{
-					if ( prop_list.sequence[i].is_empty )
-						{
-						printf ("\nNo property value found for %s\n", 
-					           prop_list.sequence[i].property_name);
-						}
-					else
-						{
-						if ( prop_list.sequence[i].wrong_data_type )
-							{
-							printf ("\nCannot convert property value to the requested data type for %s\n", 
-									prop_list.sequence[i].property_name);
-							}
-						else
-							{
-							printf ("Property = %s\n", prop_list.sequence[i].property_name);
-							
-							if ( prop_list.sequence[i].data_type == DEV_BOOLEAN )
-								{
-								if ( prop_list.sequence[i].prop_data.bool_val == true )
-									printf ("Value    = true\n");
-								else
-									printf ("Value    = false\n");
-								}
-							else
-								{
-								printf ("Value    = %f\n", prop_list.sequence[i].prop_data.double_val);
-								}
-							}
-						}
-					}
-					
-				tango_free_DbData (&prop_list); 
-				}				
-			}				
-		}			
 }
 		
