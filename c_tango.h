@@ -10,7 +10,11 @@
  *	
  * $Author$
  *
- * $Log$
+ * $Log: c_tango.h,v $
+ * Revision 1.8  2011/01/26 12:04:57  jensmeyer
+ * Added a "Bricolage" to allow a command ReadImage with an encoded return type. This command is mapped to two attributes.
+ * This should stay only until Tango allows commands with encoded data types.
+ *
  * Revision 1.7  2010/12/17 14:25:01  jensmeyer
  * Added support for attributes with DevEncoded type and added methods
  * for device locking.
@@ -101,25 +105,25 @@ enum TangoDataType {
 	DEV_ULONG,						/**<unsigned long  */
 	DEV_STRING,						/**<char *  */
 	DEVVAR_CHARARRAY,				/**<array of unsigned char  */
-	DEVVAR_SHORTARRAY,			/**<array of short */
+	DEVVAR_SHORTARRAY,				/**<array of short */
 	DEVVAR_LONGARRAY,				/**<array of int (32bits) */
-	DEVVAR_FLOATARRAY,			/**<array of float */
-	DEVVAR_DOUBLEARRAY,			/**<array of double */
-	DEVVAR_USHORTARRAY,			/**<array of unsigned short */
-	DEVVAR_ULONGARRAY,			/**<array of unsigned int (32bits) */
-	DEVVAR_STRINGARRAY,			/**<array of char * */
-	DEVVAR_LONGSTRINGARRAY,		/**<not yet supported in the C binding */
-	DEVVAR_DOUBLESTRINGARRAY,	/**<not yet supported in the C binding */
+	DEVVAR_FLOATARRAY,				/**<array of float */
+	DEVVAR_DOUBLEARRAY,				/**<array of double */
+	DEVVAR_USHORTARRAY,				/**<array of unsigned short */
+	DEVVAR_ULONGARRAY,				/**<array of unsigned int (32bits) */
+	DEVVAR_STRINGARRAY,				/**<array of char * */
+	DEVVAR_LONGSTRINGARRAY,			/**<array of unsigned int (32bits) followed by an array of char * **/
+	DEVVAR_DOUBLESTRINGARRAY,		/**<array of double followed by an array of char * */
 	DEV_STATE,						/**<TangoDevState enumeration */
 	CONST_DEV_STRING,				/**<const char * */
 	DEVVAR_BOOLEANARRAY,			/**<array of bool */
 	DEV_UCHAR,						/**<unsigned char  */
 	DEV_LONG64,						/**<long or long long (64bits)  */
 	DEV_ULONG64,					/**<unsigned long or unsigned long long (64bits)  */
-	DEVVAR_LONG64ARRAY,			/**<array of long or long long (64bits)  */
+	DEVVAR_LONG64ARRAY,				/**<array of long or long long (64bits)  */
 	DEVVAR_ULONG64ARRAY,			/**<array of unsigned long or unsigned long long (64bits)  */
-	DEV_INT,							/**<int (32bits)  */
-	DEV_ENCODED					//* Endoed data, description + buffer */
+	DEV_INT,						/**<int (32bits)  */
+	DEV_ENCODED						//* Endoed data, description + buffer */
 };
 
 
@@ -430,6 +434,30 @@ struct VarEncodedArray	{
 							TangoDevEncoded  *sequence;
 							};								
 typedef struct VarEncodedArray VarEncodedArray;
+/**
+ * \struct VarLongStringArray
+ * A structure containing a pointer to a sequence of long and the number of elements in the sequence
+ * as well as a pointer to a sequence of strings and the number of elements in the sequence.
+ */
+struct VarLongStringArray {
+							unsigned int  long_length;
+							TangoDevLong *long_sequence;
+							unsigned int  string_length;
+							char  	    **string_sequence;
+							};								
+typedef struct VarLongStringArray VarLongStringArray;
+/**
+ * \struct VarDoubleStringArray
+ * A structure containing a pointer to a sequence of double and the number of elements in the sequence
+ * as well as a pointer to a sequence of strings and the number of elements in the sequence.
+ */
+struct VarDoubleStringArray {
+							unsigned int   double_length;
+							double  	  *double_sequence;
+							unsigned int   string_length;
+							char  	     **string_sequence;
+							};								
+typedef struct VarDoubleStringArray VarDoubleStringArray;
 /*@}*/
 
 
@@ -471,27 +499,29 @@ union TangoCommandData {
 				bool			  		bool_val;
 				short					short_val;
 				unsigned short			ushort_val;
-				int				   long_val;
-				unsigned int 		  ulong_val;
+				int				   		long_val;
+				unsigned int 		  	ulong_val;
 				float					float_val;
-				double				double_val;
-				char             *string_val;
-				TangoDevState	 state_val;
-				TangoDevLong64	 long64_val;
-				TangoDevULong64 ulong64_val;
-				VarBoolArray   bool_arr;
-				VarCharArray	char_arr;
-				VarShortArray	short_arr;
-				VarUShortArray	ushort_arr;
-				VarLongArray	long_arr;
-				VarULongArray	ulong_arr;
-				VarLong64Array	long64_arr;
-				VarULong64Array ulong64_arr;				
-				VarFloatArray	float_arr;
-				VarDoubleArray double_arr;
-				VarStringArray string_arr;
-				VarStateArray 	state_arr;
-				TangoDevEncoded encoded_val;
+				double					double_val;
+				char             		*string_val;
+				TangoDevState	 		state_val;
+				TangoDevLong64	 		long64_val;
+				TangoDevULong64 		ulong64_val;
+				VarBoolArray   			bool_arr;
+				VarCharArray			char_arr;
+				VarShortArray			short_arr;
+				VarUShortArray			ushort_arr;
+				VarLongArray			long_arr;
+				VarULongArray			ulong_arr;
+				VarLong64Array			long64_arr;
+				VarULong64Array 		ulong64_arr;				
+				VarFloatArray			float_arr;
+				VarDoubleArray 			double_arr;
+				VarStringArray 			string_arr;
+				VarStateArray 			state_arr;
+				TangoDevEncoded 		encoded_val;
+				VarLongStringArray 		long_string_arr;
+				VarDoubleStringArray 	double_string_arr;
       	  };
 typedef union TangoCommandData TangoCommandData;
 /**
@@ -503,10 +533,10 @@ union TangoPropertyData {
 				unsigned char			char_val;
 				short					short_val;
 				unsigned short			ushort_val;
-				int				   long_val;
-				unsigned int 		  ulong_val;
+				int				   		long_val;
+				unsigned int 		  	ulong_val;
 				float					float_val;
-				double				double_val;
+				double					double_val;
 				char             *string_val;
 				TangoDevLong64	 long64_val;
 				TangoDevULong64 ulong64_val;
