@@ -1,4 +1,4 @@
-static const char *RcsId = "$Id$\n$Name$";
+static const char *RcsId = "$Id$\n$Name:  $";
 /******************************************************************************
  * 
  * File       :	c_tango_command.c
@@ -11,7 +11,11 @@ static const char *RcsId = "$Id$\n$Name$";
  *	
  * $Author$
  *
- * $Log$
+ * $Log: c_tango_command.c,v $
+ * Revision 1.10  2011/01/26 12:04:57  jensmeyer
+ * Added a "Bricolage" to allow a command ReadImage with an encoded return type. This command is mapped to two attributes.
+ * This should stay only until Tango allows commands with encoded data types.
+ *
  * Revision 1.9  2010/12/17 14:25:01  jensmeyer
  * Added support for attributes with DevEncoded type and added methods
  * for device locking.
@@ -265,9 +269,52 @@ bool tango_command_inout (void *proxy, char *cmd_name, CommandData *argin,
 					string_arr[i] = argin->cmd_data.string_arr.sequence[i];
 					}
 					
-				cmd_in << string_arr;				
+				cmd_in << string_arr;
+				break;
+				}
+				
+			case DEVVAR_LONGSTRINGARRAY:
+				{
+				vector<Tango::DevLong> long_arr(argin->cmd_data.long_arr.length);
+				vector<string>         string_arr(argin->cmd_data.string_arr.length);
+				
+				/* copy the long array */
+				for (int i=0; i<argin->cmd_data.long_string_arr.long_length; i++)
+					{
+					long_arr[i] = argin->cmd_data.long_string_arr.long_sequence[i];
+					}
+				
+				/* copy the string array */
+				for (int i=0; i<argin->cmd_data.long_string_arr.string_length; i++)
+					{
+					string_arr[i] = argin->cmd_data.long_string_arr.string_sequence[i];
+					}
+					
+				cmd_in.insert (long_arr, string_arr);				
 				break;
 				}				
+				
+			case DEVVAR_DOUBLESTRINGARRAY:
+				{
+				vector<double> double_arr(argin->cmd_data.double_arr.length);
+				vector<string> string_arr(argin->cmd_data.string_arr.length);
+				
+				/* copy the double array */
+				for (int i=0; i<argin->cmd_data.double_string_arr.double_length; i++)
+					{
+					double_arr[i] = argin->cmd_data.double_string_arr.double_sequence[i]; 
+					}
+				
+				/* copy the string array */
+				for (int i=0; i<argin->cmd_data.double_string_arr.string_length; i++)
+					{
+					string_arr[i] = argin->cmd_data.double_string_arr.string_sequence[i];
+					}
+					
+				cmd_in.insert (double_arr, string_arr);				
+				break;
+				}				
+
 			
 			default:
 				Tango::Except::throw_exception 
@@ -585,6 +632,88 @@ bool tango_command_inout (void *proxy, char *cmd_name, CommandData *argin,
 					}				  
 				break;										
 				}
+				
+			case DEVVAR_LONGSTRINGARRAY:
+				{
+				vector<Tango::DevLong>	long_vect;
+				vector<string>	        string_vect;
+				int nb_data;
+
+				cmd_out.extract (long_vect, string_vect);
+				
+				/* treat long array */
+				
+				nb_data =  long_vect.size();
+				
+				/* allocate sequence */
+				argout->cmd_data.long_string_arr.long_sequence = new int[nb_data];
+				argout->cmd_data.long_string_arr.long_length   = nb_data;	
+
+				/* copy data */
+				for (int i=0 ; i<nb_data ; i++)
+					{
+					argout->cmd_data.long_string_arr.long_sequence[i] = long_vect[i];
+					}				  					
+
+				
+				/* treat string array */
+				
+				nb_data = string_vect.size();
+
+				/* allocate sequence */
+				argout->cmd_data.long_string_arr.string_sequence = (char **) calloc(nb_data, sizeof(char *));;
+				argout->cmd_data.long_string_arr.string_length   = nb_data;
+
+				/* allocate strings and copy data */
+				for (int i=0 ; i<nb_data ; i++)
+					{
+					argout->cmd_data.long_string_arr.string_sequence[i] = new char[string_vect[i].length() + 1];
+					sprintf (argout->cmd_data.long_string_arr.string_sequence[i], "%s", 
+				         	 string_vect[i].c_str());
+					}				  
+				break;										
+				}
+				
+			case DEVVAR_DOUBLESTRINGARRAY:
+				{
+				vector<double>	double_vect;
+				vector<string>	string_vect;
+				int nb_data;
+
+				cmd_out.extract (double_vect, string_vect);
+				
+				/* treat double array */
+				
+				nb_data =  double_vect.size();
+				
+				/* allocate sequence */
+				argout->cmd_data.double_string_arr.double_sequence = new double[nb_data];
+				argout->cmd_data.double_string_arr.double_length   = nb_data;	
+
+				/* copy data */
+				for (int i=0 ; i<nb_data ; i++)
+					{
+					argout->cmd_data.double_string_arr.double_sequence[i] = double_vect[i];
+					}				  					
+
+				
+				/* treat string array */
+				
+				nb_data = string_vect.size();
+
+				/* allocate sequence */
+				argout->cmd_data.double_string_arr.string_sequence = (char **) calloc(nb_data, sizeof(char *));;
+				argout->cmd_data.double_string_arr.string_length   = nb_data;
+
+				/* allocate strings and copy data */
+				for (int i=0 ; i<nb_data ; i++)
+					{
+					argout->cmd_data.double_string_arr.string_sequence[i] = new char[string_vect[i].length() + 1];
+					sprintf (argout->cmd_data.double_string_arr.string_sequence[i], "%s", 
+				         	 string_vect[i].c_str());
+					}				  
+				break;										
+				}
 			
 			default:
 				Tango::Except::throw_exception 
@@ -692,7 +821,41 @@ void tango_free_CommandData (CommandData *command_data)
 			command_data->cmd_data.string_arr.sequence = NULL;
 			command_data->cmd_data.string_arr.length = 0;
 			break;
-			}
+			
+		case DEVVAR_LONGSTRINGARRAY:
+			/* free long array */
+			free (command_data->cmd_data.long_string_arr.long_sequence);
+			command_data->cmd_data.long_string_arr.long_sequence = NULL;
+			command_data->cmd_data.long_string_arr.long_length = 0;
+			
+			/* free string array */
+			for (int i=0; i<command_data->cmd_data.long_string_arr.string_length; i++ )
+				{
+				free (command_data->cmd_data.long_string_arr.string_sequence[i]);
+				}
+				
+			free (command_data->cmd_data.long_string_arr.string_sequence);
+			command_data->cmd_data.long_string_arr.string_sequence = NULL;
+			command_data->cmd_data.long_string_arr.string_length = 0;
+			break;
+			
+		case DEVVAR_DOUBLESTRINGARRAY:
+			/* free long array */
+			free (command_data->cmd_data.double_string_arr.double_sequence);
+			command_data->cmd_data.double_string_arr.double_sequence = NULL;
+			command_data->cmd_data.double_string_arr.double_length = 0;
+			
+			/* free string array */
+			for (int i=0; i<command_data->cmd_data.double_string_arr.string_length; i++ )
+				{
+				free (command_data->cmd_data.double_string_arr.string_sequence[i]);
+				}
+				
+			free (command_data->cmd_data.double_string_arr.string_sequence);
+			command_data->cmd_data.double_string_arr.string_sequence = NULL;
+			command_data->cmd_data.double_string_arr.string_length = 0;
+			break;
+		}
 }
 
 
