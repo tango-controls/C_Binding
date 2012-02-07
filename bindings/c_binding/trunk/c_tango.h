@@ -19,7 +19,7 @@
  * Added support for attributes with DevEncoded type and added methods
  * for device locking.
  *
- * Revision 1.6  2007/12/20 07:57:02  jensmeyer
+ * Revision 1.6  2007/12/20 07:57:02  jensmeyer   
  * Corrected file headers
  *
  * Revision 1.5  2007/12/18 17:26:20  jensmeyer
