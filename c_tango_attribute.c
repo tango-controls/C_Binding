@@ -105,7 +105,7 @@ bool tango_read_attribute (void *proxy, char *attr_name, AttributeData *argout, 
 		{
 		dev = (Tango::DeviceProxy *) proxy;
 		devattr = dev->read_attribute(attr_name);
-	
+		
 		convert_attribute_reading (devattr, argout);
 		}
 	
@@ -208,77 +208,88 @@ void tango_free_AttributeData (AttributeData *attribute_data)
 	switch (attribute_data->data_type)
 		{
 		case DEV_BOOLEAN:
-			free (attribute_data->attr_data.bool_arr.sequence);
+			if ( attribute_data->attr_data.bool_arr.sequence != NULL )
+				free (attribute_data->attr_data.bool_arr.sequence);
 			
 			attribute_data->attr_data.bool_arr.sequence = NULL;
 			attribute_data->attr_data.bool_arr.length = 0;
 			break;
 		
 		case DEV_UCHAR:
-			free (attribute_data->attr_data.char_arr.sequence);
+			if ( attribute_data->attr_data.char_arr.sequence != NULL )
+				free (attribute_data->attr_data.char_arr.sequence);
 			
 			attribute_data->attr_data.char_arr.sequence = NULL;
 			attribute_data->attr_data.char_arr.length = 0;
 			break;
 											
 		case DEV_SHORT:
-			free (attribute_data->attr_data.short_arr.sequence);
+			if ( attribute_data->attr_data.short_arr.sequence != NULL )
+				free (attribute_data->attr_data.short_arr.sequence);
 			
 			attribute_data->attr_data.short_arr.sequence = NULL;
 			attribute_data->attr_data.short_arr.length = 0;
 			break;
 	
 		case DEV_USHORT:
-			free (attribute_data->attr_data.ushort_arr.sequence);
+			if ( attribute_data->attr_data.ushort_arr.sequence != NULL )
+				free (attribute_data->attr_data.ushort_arr.sequence);
 			
 			attribute_data->attr_data.ushort_arr.sequence = NULL;
 			attribute_data->attr_data.ushort_arr.length = 0;
 			break;	
 			
 		case DEV_LONG:
-			free (attribute_data->attr_data.long_arr.sequence);
+			if ( attribute_data->attr_data.long_arr.sequence != NULL )
+				free (attribute_data->attr_data.long_arr.sequence);
 			
 			attribute_data->attr_data.long_arr.sequence = NULL;
 			attribute_data->attr_data.long_arr.length = 0;
 			break;			
 	
 		case DEV_ULONG:
-			free (attribute_data->attr_data.ulong_arr.sequence);
+			if ( attribute_data->attr_data.ulong_arr.sequence != NULL )
+				free (attribute_data->attr_data.ulong_arr.sequence);
 			
 			attribute_data->attr_data.ulong_arr.sequence = NULL;
 			attribute_data->attr_data.ulong_arr.length = 0;
 			break;	
 
 		case DEV_LONG64:
-			free (attribute_data->attr_data.long64_arr.sequence);
+			if ( attribute_data->attr_data.long64_arr.sequence != NULL )
+				free (attribute_data->attr_data.long64_arr.sequence);
 			
 			attribute_data->attr_data.long64_arr.sequence = NULL;
 			attribute_data->attr_data.long64_arr.length = 0;
 			break;			
 	
 		case DEV_ULONG64:
-			free (attribute_data->attr_data.ulong64_arr.sequence);
+			if ( attribute_data->attr_data.ulong64_arr.sequence != NULL )
+				free (attribute_data->attr_data.ulong64_arr.sequence);
 			
 			attribute_data->attr_data.ulong64_arr.sequence = NULL;
 			attribute_data->attr_data.ulong64_arr.length = 0;
 			break;
 	
 		case DEV_FLOAT:
-			free (attribute_data->attr_data.float_arr.sequence);
+			if ( attribute_data->attr_data.float_arr.sequence != NULL )
+				free (attribute_data->attr_data.float_arr.sequence);
 			
 			attribute_data->attr_data.float_arr.sequence = NULL;
 			attribute_data->attr_data.float_arr.length = 0;
 			break;	
 					
 		case DEV_DOUBLE:
-			free (attribute_data->attr_data.double_arr.sequence);
+			if ( attribute_data->attr_data.double_arr.sequence != NULL )
+				free (attribute_data->attr_data.double_arr.sequence);
 			
 			attribute_data->attr_data.double_arr.sequence = NULL;
 			attribute_data->attr_data.double_arr.length = 0;
 			break;
 			
 		case DEV_STATE:
-			free (attribute_data->attr_data.state_arr.sequence);
+			if ( attribute_data->attr_data.state_arr.sequence != NULL )
+				free (attribute_data->attr_data.state_arr.sequence);
 			
 			attribute_data->attr_data.state_arr.sequence = NULL;
 			attribute_data->attr_data.state_arr.length = 0;
@@ -290,7 +301,9 @@ void tango_free_AttributeData (AttributeData *attribute_data)
 				free (attribute_data->attr_data.string_arr.sequence[i]);
 				}
 				
-			free (attribute_data->attr_data.string_arr.sequence);
+			if ( attribute_data->attr_data.string_arr.sequence != NULL )
+				free (attribute_data->attr_data.string_arr.sequence);
+			
 			attribute_data->attr_data.string_arr.sequence = NULL;
 			attribute_data->attr_data.string_arr.length = 0;
 			break;											
@@ -302,7 +315,9 @@ void tango_free_AttributeData (AttributeData *attribute_data)
 				free (attribute_data->attr_data.encoded_arr.sequence[i].encoded_data);
 				}
 				
-			free (attribute_data->attr_data.encoded_arr.sequence);
+			if ( attribute_data->attr_data.encoded_arr.sequence != NULL )
+				free (attribute_data->attr_data.encoded_arr.sequence);
+			
 			attribute_data->attr_data.encoded_arr.sequence = NULL;
 			attribute_data->attr_data.encoded_arr.length = 0;
 			break;
@@ -483,16 +498,28 @@ void tango_free_AttributeInfoList (AttributeInfoList 	*attribute_info_list)
 
 void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *argout)
 {
+	/* treat INVALID data quality */
+	if (devattr.get_quality() == Tango::ATTR_INVALID )
+	{
+		/* Just initialise the first datatype. This should be valid for
+		   all data types in the union! */
+		   
+		argout->attr_data.bool_arr.length   = 0;
+		argout->attr_data.bool_arr.sequence = NULL;
+	}
+	else
+	{
+	
 	/* get data type */
 	argout->data_type = (TangoDataType) devattr.get_type();
-
+	
 	switch (argout->data_type)
 		{
 		case DEV_BOOLEAN:
 			{
 			Tango::DevVarBooleanArray *bool_seq;
 			int			               nb_data;
-
+				
 			devattr >> bool_seq;
 			nb_data =  bool_seq->length();
 
@@ -500,8 +527,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.bool_arr.sequence = new bool[nb_data];
 
 			memcpy ( argout->attr_data.bool_arr.sequence,
-				      bool_seq->get_buffer(), 
-						(sizeof(bool) * nb_data) );			  
+				     bool_seq->get_buffer(), 
+					(sizeof(bool) * nb_data) );			  
 			
 			delete bool_seq;
 			break;
@@ -519,8 +546,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.char_arr.sequence = new unsigned char[nb_data];
 
 			memcpy ( argout->attr_data.char_arr.sequence,
-				      char_seq->get_buffer(), 
-						(sizeof(unsigned char) * nb_data) );			  
+				     char_seq->get_buffer(), 
+					(sizeof(unsigned char) * nb_data) );			  
 			
 			delete char_seq;
 			break;
@@ -538,8 +565,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.short_arr.sequence = new short[nb_data];
 
 			memcpy ( argout->attr_data.short_arr.sequence,
-				      short_seq->get_buffer(), 
-						(sizeof(short) * nb_data) );			  
+				     short_seq->get_buffer(), 
+					(sizeof(short) * nb_data) );			  
 			
 			delete short_seq;
 			break;
@@ -557,8 +584,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.ushort_arr.sequence = new unsigned short[nb_data];
 
 			memcpy ( argout->attr_data.ushort_arr.sequence,
-				      ushort_seq->get_buffer(), 
-						(sizeof(unsigned short) * nb_data) );			  
+				     ushort_seq->get_buffer(), 
+					(sizeof(unsigned short) * nb_data) );			  
 			
 			delete ushort_seq;
 			break;
@@ -576,8 +603,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.long_arr.sequence = new int[nb_data];
 
 			memcpy ( argout->attr_data.long_arr.sequence,
-				      long_seq->get_buffer(), 
-						(sizeof(int) * nb_data) );			  
+				     long_seq->get_buffer(), 
+					(sizeof(int) * nb_data) );			  
 			
 			delete long_seq;
 			break;
@@ -595,8 +622,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.ulong_arr.sequence = new unsigned int[nb_data];
 
 			memcpy ( argout->attr_data.ulong_arr.sequence,
-				      ulong_seq->get_buffer(), 
-						(sizeof(unsigned int) * nb_data) );			  
+				     ulong_seq->get_buffer(), 
+					(sizeof(unsigned int) * nb_data) );			  
 			
 			delete ulong_seq;
 			break;
@@ -614,8 +641,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.long64_arr.sequence = new Tango::DevLong64[nb_data];
 
 			memcpy ( argout->attr_data.long64_arr.sequence,
-				      long64_seq->get_buffer(), 
-						(sizeof(Tango::DevLong64) * nb_data) );									  
+				     long64_seq->get_buffer(), 
+					(sizeof(Tango::DevLong64) * nb_data) );									  
 			
 			delete long64_seq;
 			break;
@@ -633,8 +660,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.ulong64_arr.sequence = new Tango::DevULong64[nb_data];
 
 			memcpy ( argout->attr_data.ulong64_arr.sequence,
-				      ulong64_seq->get_buffer(), 
-						(sizeof(Tango::DevULong64) * nb_data) );
+				     ulong64_seq->get_buffer(), 
+					(sizeof(Tango::DevULong64) * nb_data) );
 			
 			delete ulong64_seq;
 			break;
@@ -652,8 +679,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.float_arr.sequence = new float[nb_data];
 
 			memcpy ( argout->attr_data.float_arr.sequence,
-				      float_seq->get_buffer(), 
-						(sizeof(float) * nb_data) );			  
+				     float_seq->get_buffer(), 
+					(sizeof(float) * nb_data) );			  
 			
 			delete float_seq;
 			break;
@@ -671,8 +698,8 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			argout->attr_data.double_arr.sequence = new double[nb_data];
 
 			memcpy ( argout->attr_data.double_arr.sequence,
-				      double_seq->get_buffer(), 
-						(sizeof(double) * nb_data) );			  
+				     double_seq->get_buffer(), 
+					(sizeof(double) * nb_data) );			  
 			
 			delete double_seq;
 			break;
@@ -698,7 +725,7 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 				argout->attr_data.string_arr.sequence[i] = new char[string_vect[i].length() + 1];
 				sprintf (argout->attr_data.string_arr.sequence[i], "%s", 
 				         string_vect[i].c_str());
-				}				  
+				}
 			break;
 			} 			
 
@@ -709,7 +736,7 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			int nb_data;
 
 			/* The State attribute is not returning a sequence!!!!
-				     Check whether the attribute name is State! */
+			   Check whether the attribute name is State! */
 
 			if ( devattr.name == "State" )
 				{
@@ -731,7 +758,7 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 			for (int i=0 ; i<nb_data ; i++)
 				{
 				argout->attr_data.state_arr.sequence[i] = (TangoDevState) state_vect[i];
-				}					  
+				}
 			break;
 			}
 			
@@ -766,7 +793,7 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 				argout->attr_data.encoded_arr.sequence[i].encoded_data   =
 						(unsigned char *)(*encoded_vect)[i].encoded_data.get_buffer(true);
 								
-				}				  
+				}
 			break;
 			} 			
 				
@@ -778,6 +805,7 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
 	                (const char *)"c_tango_attribute.c::convert_attribute_reading()");
 				break;		
 		}
+	}
 
 	/* get quality factor */
 	argout->quality = (AttrQuality) devattr.get_quality();
