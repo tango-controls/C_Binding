@@ -31,6 +31,7 @@
 
 
 C_LIB_BASE     =  ../install/redhate4
+#C_LIB_BASE     =  ../install/redhate5
 #C_LIB_BASE     =  ../install/solaris9_gcc
 #C_LIB_BASE     =  /segfs/tango/release/suse82
 
