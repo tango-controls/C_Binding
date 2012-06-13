@@ -64,23 +64,6 @@ bool tango_command_inout (void *proxy, char *cmd_name, CommandData *argin,
 	Tango::DeviceProxy *dev;
 
 	
-	/* This is a bricolage to simulate a command with encoded type 
-	   from two attributes. 
-	   Hopefully this will disapear when commands with encoded type 
-	   are avaialable for Tango
-	 */
-	 
-	if ( strcmp (cmd_name, REPLACED_COMMAND) == 0 &&
-		 argin->arg_type == DEV_LONG )
-	{
-		bool ret = ReadImage_command (proxy, cmd_name, argin, argout, error);
-		return ret;
-	}
-	
-	/* End of bricolage!!!!!!!!!!!!!!!!!!!!!!!! */
-	
-	
-	
 	try
 		{
 		dev = (Tango::DeviceProxy *) proxy;
@@ -134,13 +117,18 @@ bool tango_command_inout (void *proxy, char *cmd_name, CommandData *argin,
 				break;
 				
 			case DEV_ENCODED:
-				/* Not yet available.
-			       Will be implemented in the next Tango release */
+				{
 				/*
 				cmd_in.insert (argin->cmd_data.encoded_val.encoded_format, 
 				               argin->cmd_data.encoded_val.encoded_data,
 							   argin->cmd_data.encoded_val.encoded_length);
 				*/
+				
+				Tango::DevVarCharArray tmp(argin->cmd_data.encoded_val.encoded_length,
+									argin->cmd_data.encoded_val.encoded_length,
+									argin->cmd_data.encoded_val.encoded_data);
+				cmd_in.insert (argin->cmd_data.encoded_val.encoded_format, &tmp);
+				}
 				break;	
 				
 			case DEVVAR_CHARARRAY:
@@ -429,9 +417,7 @@ bool tango_command_inout (void *proxy, char *cmd_name, CommandData *argin,
 			case DEV_ENCODED:
 				{
 				Tango::DevEncoded encoded_val;
-				/* Not yet available.
-				   Will be implemented in the next Tango release */
-				/*cmd_out >> encoded_val; */
+				cmd_out >> encoded_val;
 				
 				string format (encoded_val.encoded_format);
 				argout->cmd_data.encoded_val.encoded_format = new char[format.size() + 1];
@@ -962,75 +948,5 @@ static void convert_cmd_query (Tango::CommandInfo& tango_cmd_info, CommandInfo *
 	cmd_info->in_type = tango_cmd_info.in_type;
 	cmd_info->out_type = tango_cmd_info.out_type;
 	cmd_info->disp_level = (DispLevel) tango_cmd_info.disp_level;
-	
-	/* This is a bricolage to simulate a command with encoded type 
-	   from two attributes. 
-	   Hopefully this will disapear when commands with encoded type 
-	   are avaialable for Tango
-	 */
-	 
-	 if (tango_cmd_info.cmd_name == REPLACED_COMMAND &&
-	     tango_cmd_info.out_type == DEV_VOID )
-	 {
-	 	cmd_info->out_type = DEV_ENCODED;
-	 }
-
 }
 
-
-bool ReadImage_command (void *proxy, char *cmd_name, CommandData *argin, 
-                        CommandData *argout, ErrorStack *error)
-{
-	try
-	{
-		Tango::DeviceProxy *dev;
-		dev = (Tango::DeviceProxy *) proxy;
-		
-			
-		/* lock the device */
-		dev->lock();
-		
-		/* write frame number to read */
-		
-		Tango::DeviceAttribute 	devattr;
-		devattr.name = FRAME_ATTR;
-		devattr << (Tango::DevLong) argin->cmd_data.long_val;
-		
-		dev->write_attribute(devattr);
-		
-		/* read image frame */
-		
-		Tango::DeviceAttribute   img_attr;
-		img_attr = dev->read_attribute(IMAGE_ATTR);
-		
-		Tango::DevEncoded encoded_val;
-		img_attr >> encoded_val;
-		
-		/* unlock the device */
-		dev->unlock();
-		
-		/* return data */
-		
-		string format (encoded_val.encoded_format);
-		argout->cmd_data.encoded_val.encoded_format = new char[format.size() + 1];
-		sprintf (argout->cmd_data.encoded_val.encoded_format, "%s", format.c_str());
-				
-		/* get the pointer to the buffer and take over the memory */
-		/* setting the parameter to true, does not free the memory when freeing the CORBA sequence */
-				
-		argout->cmd_data.encoded_val.encoded_length = 
-						encoded_val.encoded_data.length();
-		argout->cmd_data.encoded_val.encoded_data =
-						(unsigned char *)encoded_val.encoded_data.get_buffer(true);
-					
-		argout->arg_type = (TangoDataType) DEV_ENCODED;
-	}
-	
-	catch (Tango::DevFailed &tango_exception)
-	{
-		translate_exception (tango_exception, error);		
-		return false;
-	}
-				
-	return true;
-}

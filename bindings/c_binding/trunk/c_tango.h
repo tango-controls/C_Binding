@@ -1169,19 +1169,6 @@ void tango_free_DbData   	(DbData  *db_data);
 /*@}*/
 
 
-/* 	This is a bricolage to simulate a command with encoded type 
-	from two attributes. 
-	Hopefully this will disapear when commands with encoded type 
-	are avaialable for Tango
- */
-
-#define REPLACED_COMMAND	"readImage"
-#define FRAME_ATTR			"readImage_frame_number"
-#define IMAGE_ATTR			"readImage_image_data"
-
-bool ReadImage_command (void *proxy, char *cmd_name, CommandData *argin, 
-                        CommandData *argout, ErrorStack *error);
-
 #ifdef __cplusplus
 }
 #endif /*__cplusplus */
