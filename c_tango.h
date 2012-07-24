@@ -123,7 +123,7 @@ enum TangoDataType {
 	DEVVAR_LONG64ARRAY,				/**<array of long or long long (64bits)  */
 	DEVVAR_ULONG64ARRAY,			/**<array of unsigned long or unsigned long long (64bits)  */
 	DEV_INT,						/**<int (32bits)  */
-	DEV_ENCODED						//* Endoed data, description + buffer */
+	DEV_ENCODED						/**<Endoed data, description + buffer */
 };
 
 
@@ -1047,7 +1047,7 @@ bool tango_delete_database_proxy (void **db_proxy, ErrorStack *error);
 /** 
   * Get a list of exported devices using a name filter.
   * The name filter can contain one or more wilcards (*).
-  * Example:  sr/*-pen/*
+  * Example:  sr/ *-pen/ *
   *
   * \param[in] db_proxy The pointer to the database handle.
   * \param[in] name_filter The filter string
@@ -1071,7 +1071,7 @@ bool tango_get_device_exported_for_class   (void *db_proxy, char *class_name,
 /** 
   * Get a list of free property objects from the Tango database using a name filter.
   * The name filter can contain one or more wilcards (*).
-  * Example:  my*prop/*
+  * Example:  my*prop/ *
   *
   * \param[in] db_proxy The pointer to the database handle.
   * \param[in] name_filter The filter string
