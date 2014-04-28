@@ -72,6 +72,9 @@ bool tango_read_attributes (void *proxy, VarStringArray *attr_names, AttributeDa
 			{
 			convert_attribute_reading ((*devattr_list)[i], &(argout->sequence[i]));
 			}
+		
+		// The memory is copied, we can now free the returned data
+		delete devattr_list;
 		}
 	
 	catch (Tango::DevFailed &tango_exception)
