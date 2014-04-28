@@ -73,13 +73,17 @@ LFLAGS =  $(LIB_DIRS)  		\
 				-lomnithread	\
 				-lCOS4			\
 				-lpthread		\
+                -lzmq           \
 				-lposix4 -lsocket -lnsl
 endif
 
 
 ifdef linux
+ifdef debian6
+CXXFLAGS = -g -std=c++0x -D_REENTRANT $(INCLUDE_DIRS)
+else
 CXXFLAGS = -g -D_REENTRANT $(INCLUDE_DIRS)
-#CXXFLAGS = -g -std=c++0x -D_REENTRANT $(INCLUDE_DIRS)
+endif
 CXXFLAGS_SL = $(CXXFLAGS) -fPIC
 
 LFLAGS =  $(LIB_DIRS)  		\
@@ -89,6 +93,7 @@ LFLAGS =  $(LIB_DIRS)  		\
 				-lomniDynamic4	\
 				-lomnithread	\
 				-lCOS4			\
+                -lzmq           \
 				-ldl -lpthread
 endif
 
