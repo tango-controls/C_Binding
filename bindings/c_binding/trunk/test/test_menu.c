@@ -29,6 +29,7 @@ static const char *RcsId = "$Id$\n$Name$";
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include <c_tango.h>
 

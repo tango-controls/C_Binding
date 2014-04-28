@@ -27,6 +27,7 @@ static const char *RcsId = "$Id$\n$Name$";
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include <c_tango.h>
 
@@ -141,7 +142,8 @@ main (unsigned int argc, char **argv)
 			}
 		}
 
-		/* write attributes with scalar values */
+        
+        /* write attributes with scalar values */
 		
 		{
 		AttributeData in_att[2];
