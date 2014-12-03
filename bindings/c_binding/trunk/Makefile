@@ -79,7 +79,7 @@ endif
 
 
 ifdef linux
-ifdef debian6
+ifdef debian
 CXXFLAGS = -g -std=c++0x -D_REENTRANT $(INCLUDE_DIRS)
 else
 CXXFLAGS = -g -D_REENTRANT $(INCLUDE_DIRS)
