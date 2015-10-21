@@ -9,9 +9,10 @@
 #
 ##############################################################################
 
-MAJOR_VERS = 3
+# Version 5 only to follow the tango version 9.1 as major release!
+MAJOR_VERS = 5
 MINOR_VERS = 0
-PATCH_VERS = 2
+PATCH_VERS = 0
 
 ##############################################################################
 #
