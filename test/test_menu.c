@@ -41,7 +41,8 @@ main (unsigned int argc, char **argv)
 	ErrorStack error;
 
 	char			cmd_string [256];
-	long 			cmd;
+	/*long 			cmd;*/
+    int             cmd;
 
 
 	if (argc < 2)
@@ -110,6 +111,7 @@ main (unsigned int argc, char **argv)
 
 	   for( ; gets(cmd_string) == (char *)0 ; );
 	   sscanf(cmd_string,"%d",&cmd);
+       printf ("\nNumber entered = %d\n", cmd);
 
 	   if ( cmd != 0 )
 	      {
