@@ -1,0 +1,3 @@
+\usepackage[latin1]{inputenc}
+\usepackage{mathptm,times}
+\usepackage[colorlinks=true,backref=true]{hyperref}
