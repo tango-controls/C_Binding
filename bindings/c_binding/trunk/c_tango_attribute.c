@@ -37,6 +37,7 @@ static const char *RcsId = "$Id$\n$Name$";
 
 /* internal function definitions */
 void translate_exception (Tango::DevFailed& tango_exception, ErrorStack *error);
+void translate_exception (Tango::NamedDevFailedList& tango_exception, ErrorStack *error);
 static void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *argout);
 static void convert_attribute_writing (AttributeData *argin, Tango::DeviceAttribute& devattr);
 static void convert_attr_query (Tango::AttributeInfo& tango_attr_info, AttributeInfo *attr_info);
@@ -150,7 +151,11 @@ bool tango_write_attributes (void *proxy, AttributeDataList *argin, ErrorStack *
 		
 		dev->write_attributes (devattr_list);
 		}
-	
+	catch (Tango::NamedDevFailedList &tango_exception)
+		{
+		translate_exception (tango_exception, error);
+		return false;
+		}
 	catch (Tango::DevFailed &tango_exception)
 		{
 		translate_exception (tango_exception, error);		
@@ -1077,3 +1082,4 @@ static void convert_attr_query (Tango::AttributeInfo& tango_attr_info, Attribute
 	
 	attr_info->disp_level = (DispLevel) tango_attr_info.disp_level;
 }
+
