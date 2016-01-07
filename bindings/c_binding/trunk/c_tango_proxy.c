@@ -307,3 +307,39 @@ void translate_exception (Tango::DevFailed& tango_exception, ErrorStack *error)
 			}
 }
 
+void translate_exception (Tango::NamedDevFailedList& tango_exception, ErrorStack *error)
+{
+    /* calculate total array size */
+    int length = 0;
+
+    for (int i=0; i<tango_exception.err_list.size(); i++)
+	{
+	    length += tango_exception.err_list[i].err_stack.length();
+	}
+
+    /* allocate error stack */
+    error->length   = length;
+    error->sequence = new DevFailed[length];
+
+
+    for (int i=0; i<tango_exception.err_list.size(); i++)
+	{
+	    const Tango::DevErrorList &err_stack = tango_exception.err_list[i].err_stack;
+
+	    /* copy the full tango error list */
+	    for (int j=0; j< err_stack.length(); j++)
+		{
+		    error->sequence[i+j].desc = (char*)malloc((strlen(err_stack[j].desc.in()) + 1)*sizeof(char));
+		    sprintf (error->sequence[i+j].desc, "%s", err_stack[j].desc.in());
+
+		    error->sequence[i+j].reason = (char*)malloc((strlen(err_stack[j].reason.in()) + 1)*sizeof(char));
+		    sprintf (error->sequence[i+j].reason, "%s", err_stack[j].reason.in());
+
+		    error->sequence[i+j].origin = (char*)malloc((strlen(err_stack[j].origin.in()) + 1)*sizeof(char));
+		    sprintf (error->sequence[i+j].origin, "%s", err_stack[j].origin.in());
+
+		    error->sequence[i+j].severity = (ErrSeverity) err_stack[j].severity;
+		}
+	}
+}
+
