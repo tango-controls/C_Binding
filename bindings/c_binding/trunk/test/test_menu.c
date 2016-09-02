@@ -33,6 +33,8 @@ static const char *RcsId = "$Id$\n$Name$";
 
 #include <c_tango.h>
 
+void read_attribute_data (AttributeData attr_out);
+
 
 main (unsigned int argc, char **argv)
 {
@@ -41,7 +43,8 @@ main (unsigned int argc, char **argv)
 	ErrorStack error;
 
 	char			cmd_string [256];
-	long 			cmd;
+	/*long 			cmd;*/
+    int             cmd;
 
 
 	if (argc < 2)
@@ -102,7 +105,9 @@ main (unsigned int argc, char **argv)
 		printf("          23. Read the list of free properties for an object\n");
 		printf("          24. Read a free property of an object\n");
 		printf("          25. Put a scalar free property of an object\n");		
-		printf("          26. Delete a free property of an object\n");
+		printf("          26. Delete a free property of an object\n\n");
+        
+        printf("          27. Read attributes\n");
 		
 	   printf("\n           0. Quit \n\n");
 	   printf("Execute command number ? ");
@@ -110,6 +115,7 @@ main (unsigned int argc, char **argv)
 
 	   for( ; gets(cmd_string) == (char *)0 ; );
 	   sscanf(cmd_string,"%d",&cmd);
+       printf ("\nNumber entered = %d\n", cmd);
 
 	   if ( cmd != 0 )
 	      {
@@ -535,7 +541,7 @@ main (unsigned int argc, char **argv)
 				AttributeData attr_out;
 				
 				printf("\nEnter an attribute name : ");
-	   		for( ; gets(cmd_string) == (char *)0 ; );
+                for( ; gets(cmd_string) == (char *)0 ; );
 
 				if (!tango_read_attribute (proxy, cmd_string, &attr_out, &error))
 					{
@@ -544,111 +550,7 @@ main (unsigned int argc, char **argv)
 					}		
 				else
 					{
-					if ( attr_out.quality == ATTR_INVALID )
-						{
-						printf ("Attribute data is INVALID!\n");
-						}
-					else
-						{						
-						switch (attr_out.data_type)
-							{
-							int i;
-							
-							case DEV_BOOLEAN:
-								for (i=0; i<attr_out.dim_x; i++)
-									{
-									printf ("attr read value = %d\n", attr_out.attr_data.bool_arr.sequence[i]);
-									}
-								for (i=attr_out.dim_x; i<attr_out.attr_data.bool_arr.length; i++)
-									{
-									printf ("attr set value  = %d\n", attr_out.attr_data.bool_arr.sequence[i]);
-									}
-								break;							
-							
-
-							case DEV_UCHAR:
-								for (i=0; i<attr_out.dim_x; i++)
-									{
-									printf ("attr read value = %d\n", attr_out.attr_data.char_arr.sequence[i]);
-									}
-								for (i=attr_out.dim_x; i<attr_out.attr_data.char_arr.length; i++)
-									{
-									printf ("attr set value  = %d\n", attr_out.attr_data.char_arr.sequence[i]);
-									}
-								break;
-
-							case DEV_SHORT:
-								for (i=0; i<attr_out.dim_x; i++)
-									{
-									printf ("attr read value = %d\n", attr_out.attr_data.short_arr.sequence[i]);
-									}
-								for (i=attr_out.dim_x; i<attr_out.attr_data.short_arr.length; i++)
-									{
-									printf ("attr set value  = %d\n", attr_out.attr_data.short_arr.sequence[i]);
-									}
-								break;
-
-							case DEV_LONG:
-								for (i=0; i<attr_out.dim_x; i++)
-									{
-									printf ("attr read value = %d\n", attr_out.attr_data.long_arr.sequence[i]);
-									}
-								for (i=attr_out.dim_x; i<attr_out.attr_data.long_arr.length; i++)
-									{
-									printf ("attr set value  = %d\n", attr_out.attr_data.long_arr.sequence[i]);
-									}
-								break;
-	
-							case DEV_FLOAT:
-								for (i=0; i<attr_out.dim_x; i++)
-									{
-									printf ("attr read value = %f\n", attr_out.attr_data.float_arr.sequence[i]);
-									}
-								for (i=attr_out.dim_x; i<attr_out.attr_data.float_arr.length; i++)
-									{
-									printf ("attr set value  = %f\n", attr_out.attr_data.float_arr.sequence[i]);
-									}
-								break;
-								
-							case DEV_DOUBLE:
-								for (i=0; i<attr_out.dim_x; i++)
-									{
-									printf ("attr read value = %f\n", attr_out.attr_data.double_arr.sequence[i]);
-									}
-								for (i=attr_out.dim_x; i<attr_out.attr_data.double_arr.length; i++)
-									{
-									printf ("attr set value  = %f\n", attr_out.attr_data.double_arr.sequence[i]);
-									}
-								break;
-								
-							case DEV_STATE:
-								for (i=0; i<attr_out.dim_x; i++)
-									{
-									printf ("attr read value = %s\n", TangoDevStateName[attr_out.attr_data.state_arr.sequence[i]]);
-									}
-								for (i=attr_out.dim_x; i<attr_out.attr_data.state_arr.length; i++)
-									{
-									printf ("attr set value  = %s\n", TangoDevStateName[attr_out.attr_data.state_arr.sequence[i]]);
-									}
-								break;
-								
-							case DEV_STRING:
-								for (i=0; i<attr_out.dim_x; i++)
-									{
-									printf ("attr read value = %s\n", attr_out.attr_data.string_arr.sequence[i]);
-									}
-								for (i=attr_out.dim_x; i<attr_out.attr_data.string_arr.length; i++)
-									{
-									printf ("attr set value  = %s\n", attr_out.attr_data.string_arr.sequence[i]);
-									}
-								break;																							
-								
-							default:
-								printf ("Printing for the attribute data type is not implemented in this menu!\n");
-								break;
-							}							
-						}
-					
+                    read_attribute_data (attr_out);
 					tango_free_AttributeData (&attr_out);
 					}				
 				}
@@ -1046,6 +948,43 @@ main (unsigned int argc, char **argv)
 					}				
 				}
 				break;
+                
+        case (27):
+                {
+                char attr_names[2][256];
+                AttributeDataList attr_out_list;
+				
+				printf("\nEnter first attribute name: ");
+                for( ; gets(attr_names[0]) == (char *)0 ; );
+                
+                printf("\nEnter second attribute name: ");
+                for( ; gets(attr_names[1]) == (char *)0 ; );
+                
+                
+                VarStringArray name_list;
+                name_list.length   = 2;
+                name_list.sequence = (char **) calloc(2, sizeof(char *));
+                name_list.sequence[0] = attr_names[0];
+                name_list.sequence[1] = attr_names[1];
+                
+                if (!tango_read_attributes (proxy, &name_list, &attr_out_list, &error))
+					{
+					tango_print_ErrorStack (&error);
+					tango_free_ErrorStack (&error);
+					}		
+				else
+					{
+                    int i;
+                    for (i=0; i<attr_out_list.length; i++)
+                        {
+                        printf ("\n%s:\n", attr_names[i]);
+                        read_attribute_data (attr_out_list.sequence[i]);  
+                        }
+                    
+					tango_free_AttributeDataList (&attr_out_list);
+					}
+                }
+                break;
 				
 																											
 	   	case (0) : 
@@ -1081,4 +1020,112 @@ main (unsigned int argc, char **argv)
 		printf (
 		"**********************************************************\n");			
 		}
+}
+
+void read_attribute_data (AttributeData attr_out)
+{
+    if ( attr_out.quality == ATTR_INVALID )
+        {
+        printf ("Attribute data is INVALID!\n");
+        }
+    else
+        {						
+        switch (attr_out.data_type)
+            {
+            int i;
+            
+            case DEV_BOOLEAN:
+                for (i=0; i<attr_out.dim_x; i++)
+                    {
+                    printf ("attr read value = %d\n", attr_out.attr_data.bool_arr.sequence[i]);
+                    }
+                for (i=attr_out.dim_x; i<attr_out.attr_data.bool_arr.length; i++)
+                    {
+                    printf ("attr set value  = %d\n", attr_out.attr_data.bool_arr.sequence[i]);
+                    }
+                break;							
+            
+    
+            case DEV_UCHAR:
+                for (i=0; i<attr_out.dim_x; i++)
+                    {
+                    printf ("attr read value = %d\n", attr_out.attr_data.char_arr.sequence[i]);
+                    }
+                for (i=attr_out.dim_x; i<attr_out.attr_data.char_arr.length; i++)
+                    {
+                    printf ("attr set value  = %d\n", attr_out.attr_data.char_arr.sequence[i]);
+                    }
+                break;
+    
+            case DEV_SHORT:
+                for (i=0; i<attr_out.dim_x; i++)
+                    {
+                    printf ("attr read value = %d\n", attr_out.attr_data.short_arr.sequence[i]);
+                    }
+                for (i=attr_out.dim_x; i<attr_out.attr_data.short_arr.length; i++)
+                    {
+                    printf ("attr set value  = %d\n", attr_out.attr_data.short_arr.sequence[i]);
+                    }
+                break;
+    
+            case DEV_LONG:
+                for (i=0; i<attr_out.dim_x; i++)
+                    {
+                    printf ("attr read value = %d\n", attr_out.attr_data.long_arr.sequence[i]);
+                    }
+                for (i=attr_out.dim_x; i<attr_out.attr_data.long_arr.length; i++)
+                    {
+                    printf ("attr set value  = %d\n", attr_out.attr_data.long_arr.sequence[i]);
+                    }
+                break;
+    
+            case DEV_FLOAT:
+                for (i=0; i<attr_out.dim_x; i++)
+                    {
+                    printf ("attr read value = %f\n", attr_out.attr_data.float_arr.sequence[i]);
+                    }
+                for (i=attr_out.dim_x; i<attr_out.attr_data.float_arr.length; i++)
+                    {
+                    printf ("attr set value  = %f\n", attr_out.attr_data.float_arr.sequence[i]);
+                    }
+                break;
+                
+            case DEV_DOUBLE:
+                for (i=0; i<attr_out.dim_x; i++)
+                    {
+                    printf ("attr read value = %f\n", attr_out.attr_data.double_arr.sequence[i]);
+                    }
+                for (i=attr_out.dim_x; i<attr_out.attr_data.double_arr.length; i++)
+                    {
+                    printf ("attr set value  = %f\n", attr_out.attr_data.double_arr.sequence[i]);
+                    }
+                break;
+                
+            case DEV_STATE:
+                for (i=0; i<attr_out.dim_x; i++)
+                    {
+                    printf ("attr read value = %s\n", TangoDevStateName[attr_out.attr_data.state_arr.sequence[i]]);
+                    }
+                for (i=attr_out.dim_x; i<attr_out.attr_data.state_arr.length; i++)
+                    {
+                    printf ("attr set value  = %s\n", TangoDevStateName[attr_out.attr_data.state_arr.sequence[i]]);
+                    }
+                break;
+                
+            case DEV_STRING:
+                for (i=0; i<attr_out.dim_x; i++)
+                    {
+                    printf ("attr read value = %s\n", attr_out.attr_data.string_arr.sequence[i]);
+                    }
+                for (i=attr_out.dim_x; i<attr_out.attr_data.string_arr.length; i++)
+                    {
+                    printf ("attr set value  = %s\n", attr_out.attr_data.string_arr.sequence[i]);
+                    }
+                break;																							
+                
+            default:
+                printf ("Printing for the attribute data type is not implemented in this menu!\n");
+                break;
+            }
+        }
 }
