@@ -8,7 +8,7 @@
  *
  * Original   :	November 2007	
  *	
- * $Author$
+ * $Author: jensmeyer $
  *
  * $Log: c_tango.h,v $
  * Revision 1.8  2011/01/26 12:04:57  jensmeyer

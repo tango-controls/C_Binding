@@ -8,7 +8,7 @@
  *
  * Original   :	November 2007	
  *	
- * $Author$
+ * $Author: jensmeyer $
  *
  * $Log$
  * Revision 1.1  2007/12/06 08:01:25  jensmeyer

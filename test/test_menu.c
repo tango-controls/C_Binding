@@ -1,4 +1,4 @@
-static const char *RcsId = "$Id$\n$Name$";
+static const char *RcsId = "$Id: test_menu.c 30114 2016-09-02 08:51:52Z jensmeyer $\n$Name$";
 /******************************************************************************
  * 
  * File       :	test_menu.c
@@ -11,7 +11,7 @@ static const char *RcsId = "$Id$\n$Name$";
  *
  * Original   :	November 2007	
  *	
- * $Author$
+ * $Author: jensmeyer $
  *
  * $Log$
  * Revision 1.3  2007/12/18 17:33:11  jensmeyer

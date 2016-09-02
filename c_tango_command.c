@@ -1,4 +1,4 @@
-static const char *RcsId = "$Id$\n$Name:  $";
+static const char *RcsId = "$Id: c_tango_command.c 20680 2012-06-13 12:52:27Z jensmeyer $\n$Name:  $";
 /******************************************************************************
  * 
  * File       :	c_tango_command.c
@@ -9,7 +9,7 @@ static const char *RcsId = "$Id$\n$Name:  $";
  *
  * Original   :	November 2007	
  *	
- * $Author$
+ * $Author: jensmeyer $
  *
  * $Log: c_tango_command.c,v $
  * Revision 1.10  2011/01/26 12:04:57  jensmeyer
