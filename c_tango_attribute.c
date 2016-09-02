@@ -53,7 +53,11 @@ bool tango_read_attributes (void *proxy, VarStringArray *attr_names, AttributeDa
 	
 	try
 		{
-		dev = (Tango::DeviceProxy *) proxy;
+		// Be sure the data structure is initialised
+        argout->length   = 0;
+        argout->sequence = NULL;
+        
+        dev = (Tango::DeviceProxy *) proxy;
 		
 		/* copy the attribute names to a vecort of string */
 		vector<string> names;
@@ -67,12 +71,38 @@ bool tango_read_attributes (void *proxy, VarStringArray *attr_names, AttributeDa
 		/* allocate the  AttributeDataList for the number of attributes returned */
 		argout->length   = devattr_list->size();
 		argout->sequence = new AttributeData[argout->length];
+        
+        // loop over all Attribute data structures and initialise them
+        for (int i=0; i < devattr_list->size(); i++)
+            {
+            /* Just initialise the first datatype. This should be valid for
+               all data types in the union! */
+            argout->sequence[i].attr_data.bool_arr.length   = 0;
+            argout->sequence[i].attr_data.bool_arr.sequence = NULL;
+            }
 		
 		/* loop over all returned attributes and convert the data */
 		for (int i=0; i < devattr_list->size(); i++)
 			{
-			convert_attribute_reading ((*devattr_list)[i], &(argout->sequence[i]));
-			}
+			// catch exception and free devattr_list and re-throw!!!!!!
+            try
+                {
+                convert_attribute_reading ((*devattr_list)[i], &(argout->sequence[i]));
+                }
+            catch (Tango::DevFailed &tango_exception)
+                {
+                    /* Delete the returned data before jumping out */
+                    delete devattr_list;
+                    
+                    TangoSys_OMemStream o;
+                    o << "Reading of attribute data failed for " << names[i] <<ends;
+                    Tango::Except::re_throw_exception 
+						( tango_exception, 
+                        (const char *)"Data read error",
+                        o.str(),
+                        (const char *)"c_tango_attribute.c::tango_read_attributes()");
+                }
+            }
 		
 		// The memory is copied, we can now free the returned data
 		delete devattr_list;
@@ -506,16 +536,26 @@ void tango_free_AttributeInfoList (AttributeInfoList 	*attribute_info_list)
 
 void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *argout)
 {
-	/* treat INVALID data quality */
-	if (devattr.get_quality() == Tango::ATTR_INVALID )
-	{
-		/* Just initialise the first datatype. This should be valid for
-		   all data types in the union! */
+	
+    /* Be sure the data structure is initialised.
+       Just initialise the first datatype. This should be valid for
+       all data types in the union! */
 		   
-		argout->attr_data.bool_arr.length   = 0;
-		argout->attr_data.bool_arr.sequence = NULL;
-	}
-	else
+    argout->attr_data.bool_arr.length   = 0;
+    argout->attr_data.bool_arr.sequence = NULL;
+    
+    if (devattr.has_failed())
+    {
+        /* We need to throw the error list as exception, how to? */
+        
+        Tango::DevFailed ex (devattr.get_err_stack());
+        Tango::Except::re_throw_exception (ex, 
+                        (const char *)"Data read error",
+                        (const char *)"Error in attribute return value detected!",
+                        (const char *)"c_tango_attribute.c::convert_attribute_reading()");
+    }
+    
+	if (devattr.get_quality() != Tango::ATTR_INVALID )
 	{
 	
 	/* get data type */
