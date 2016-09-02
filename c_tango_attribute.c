@@ -1,4 +1,4 @@
-static const char *RcsId = "$Id: c_tango_attribute.c 30113 2016-09-02 08:49:58Z jensmeyer $\n$Name$";
+static const char *RcsId = "$Id: c_tango_attribute.c 30116 2016-09-02 14:35:16Z jensmeyer $\n$Name$";
 /******************************************************************************
  * 
  * File       :	c_tango_attribute.c
@@ -240,8 +240,11 @@ bool tango_write_attribute (void *proxy, AttributeData *argin, ErrorStack *error
  */
 void tango_free_AttributeData (AttributeData *attribute_data)
 {
-	free (attribute_data->name);
-	attribute_data->name = NULL;
+	if ( attribute_data->name != NULL )
+        {
+        free (attribute_data->name);
+        attribute_data->name = NULL;
+        }
 	
 	switch (attribute_data->data_type)
 		{
@@ -541,6 +544,7 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
        Just initialise the first datatype. This should be valid for
        all data types in the union! */
 		   
+    argout->name = NULL;
     argout->attr_data.bool_arr.length   = 0;
     argout->attr_data.bool_arr.sequence = NULL;
     
