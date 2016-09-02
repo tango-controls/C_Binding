@@ -240,8 +240,11 @@ bool tango_write_attribute (void *proxy, AttributeData *argin, ErrorStack *error
  */
 void tango_free_AttributeData (AttributeData *attribute_data)
 {
-	free (attribute_data->name);
-	attribute_data->name = NULL;
+	if ( attribute_data->name != NULL )
+        {
+        free (attribute_data->name);
+        attribute_data->name = NULL;
+        }
 	
 	switch (attribute_data->data_type)
 		{
@@ -541,6 +544,7 @@ void convert_attribute_reading (Tango::DeviceAttribute& devattr, AttributeData *
        Just initialise the first datatype. This should be valid for
        all data types in the union! */
 		   
+    argout->name = NULL;
     argout->attr_data.bool_arr.length   = 0;
     argout->attr_data.bool_arr.sequence = NULL;
     
