@@ -5,24 +5,6 @@
 include Make.rules
 
 
-ifdef _solaris
-ifdef gcc
-CC = c++
-AR = ar rv
-AR_SL = $(CC) -fPIC -shared -ldl
-VERS_OPT = -Wl,-h,
-SL_EXT = so
-else
-CC = CC
-AR = CC -xar -o 
-AR_SL = $(CC) -mt -G -lCstd -ldl
-VERS_OPT = -h
-SL_EXT = so
-endif
-endif
-
-
-ifdef linux
 CC = c++
 AR = ar rv
 AR_SL = $(CC) -fPIC -shared -ldl 
@@ -31,7 +13,6 @@ SL_EXT = so
 #
 DOC_CONFIG = doxygen/Doxyfile
 GEN_DOC = $(DOXYGEN) $(DOC_CONFIG)
-endif
 
 
 CLIENT_SRC = .
@@ -55,47 +36,20 @@ LIB_DIRS     = -L $(TANGO_HOME)/lib \
 #
 #------------------------------------------------------------------
 
-ifdef _solaris
-ifdef gcc
-CXXFLAGS = -O2 -D_REENTRANT $(INCLUDE_DIRS)
-CXXFLAGS_SL = $(CXXFLAGS) -fPIC
-else
-CXXFLAGS = 	-mt -D_POSIX_PTHREAD_SEMANTICS \
-	   		-xregs=no%appl $(INCLUDE_DIRS)
-CXXFLAGS_SL = $(CXXFLAGS) -KPIC
-endif
 
-LFLAGS =  $(LIB_DIRS)  		\
-				-ltango			\
-				-llog4tango		\
-				-lomniORB4 		\
-				-lomniDynamic4	\
-				-lomnithread	\
-				-lCOS4			\
-				-lpthread		\
-                -lzmq           \
-				-lposix4 -lsocket -lnsl
-endif
-
-
-ifdef linux
-ifdef debian
 CXXFLAGS = -g -std=c++0x -D_REENTRANT $(INCLUDE_DIRS)
-else
-CXXFLAGS = -g -D_REENTRANT $(INCLUDE_DIRS)
-endif
+#CXXFLAGS = -g -D_REENTRANT $(INCLUDE_DIRS)
+
 CXXFLAGS_SL = $(CXXFLAGS) -fPIC
 
 LFLAGS =  $(LIB_DIRS)  		\
 				-ltango			\
-				-llog4tango		\
 				-lomniORB4 		\
 				-lomniDynamic4	\
 				-lomnithread	\
 				-lCOS4			\
                 -lzmq           \
 				-ldl -lpthread
-endif
 
 #-------------------------------------------------------------------
 
@@ -220,11 +174,7 @@ clean:
 clean_all:
 	rm -f *.o
 	rm -f test/*.html
-	rm -f test/solaris/*.html
-	rm -f test/suse72/*.html
 	rm -f test/*.log
-	rm -f test/solaris/*.log
-	rm -f test/suse72/*log
 	rm -f winnt_lib/tango_static/Debug/*.obj
 	rm -f winnt_lib/tango_static/Debug/*.lib
 	rm -f winnt_lib/tango_static/Release/*.obj
@@ -240,3 +190,4 @@ clean_all:
 	rm -f winnt_lib/tango_dll/Release/*.exp
 	rm -f winnt_lib/tango_dll/Release/*.map
 	
+
